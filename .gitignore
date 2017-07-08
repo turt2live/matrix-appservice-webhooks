@@ -6,7 +6,7 @@ user-store.db
 db/*.db
 
 config/config.yaml
-appservice-registration-webhook.yaml
+appservice-registration-webhooks.yaml
 rooms.db
 users.db
 

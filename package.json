@@ -24,8 +24,6 @@
   "homepage": "https://github.com/turt2live/matrix-appservice-webhooks#readme",
   "dependencies": {
     "chalk": "^2.0.1",
-    "config": "^1.26.1",
-    "js-yaml": "^3.9.0",
     "matrix-appservice-bridge": "^1.4.0-a",
     "moment": "^2.18.1",
     "winston": "^2.3.1"

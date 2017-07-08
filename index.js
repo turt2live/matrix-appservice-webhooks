@@ -4,7 +4,7 @@ var AppServiceRegistration = require("matrix-appservice-bridge").AppServiceRegis
 var path = require("path");
 
 new Cli({
-    registrationPath: "appservice-registration-webhook.yaml",
+    registrationPath: "appservice-registration-webhooks.yaml",
     enableRegistration: true,
     enableLocalpart: true,
     bridgeConfig: {
@@ -48,8 +48,8 @@ new Cli({
             registration.setSenderLocalpart("_webhook");
         }
 
-        registration.addRegexPattern("users", "@_webhook.*");
-        registration.addRegexPattern("aliases", "#_webhook.*");
+        registration.addRegexPattern("users", "@_webhook.*", true);
+        registration.addRegexPattern("aliases", "#_webhook.*", true);
 
         callback(registration);
     },

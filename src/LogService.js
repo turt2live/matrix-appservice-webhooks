@@ -1,6 +1,5 @@
 var winston = require("winston");
 var chalk = require("chalk");
-var config = require("config");
 var fs = require('fs');
 var moment = require('moment');
 
@@ -32,41 +31,7 @@ function getTimestamp() {
     return moment().format('MMM-D-YYYY HH:mm:ss.SSS Z');
 }
 
-var loggingConfig = config.get('logging');
-
-var transports = [];
-transports.push(new (winston.transports.File)({
-    json: false,
-    name: "file",
-    filename: loggingConfig.file,
-    timestamp: getTimestamp,
-    formatter: winstonFormatter,
-    level: loggingConfig.fileLevel,
-    maxsize: loggingConfig.rotate.size,
-    maxFiles: loggingConfig.rotate.count,
-    zippedArchive: false
-}));
-
-if (loggingConfig.console) {
-    transports.push(new (winston.transports.Console)({
-        json: false,
-        name: "console",
-        timestamp: getTimestamp,
-        formatter: winstonColorFormatter,
-        level: loggingConfig.consoleLevel
-    }));
-}
-
-var log = new winston.Logger({
-    transports: transports,
-    levels: {
-        error: 0,
-        warn: 1,
-        info: 2,
-        verbose: 3,
-        silly: 4
-    }
-});
+var log = null;
 
 function doLog(level, module, messageOrObject) {
     if (typeof(messageOrObject) === 'object' && !(messageOrObject instanceof Error))
@@ -100,6 +65,42 @@ class LogService {
 
     static silly(module, message) {
         doLog('silly', module, message);
+    }
+
+    static init(config) {
+        var transports = [];
+        transports.push(new (winston.transports.File)({
+            json: false,
+            name: "file",
+            filename: config.logging.file,
+            timestamp: getTimestamp,
+            formatter: winstonFormatter,
+            level: config.logging.fileLevel,
+            maxsize: config.logging.rotate.size,
+            maxFiles: config.logging.rotate.count,
+            zippedArchive: false
+        }));
+
+        if (config.logging.console) {
+            transports.push(new (winston.transports.Console)({
+                json: false,
+                name: "console",
+                timestamp: getTimestamp,
+                formatter: winstonColorFormatter,
+                level: config.logging.consoleLevel
+            }));
+        }
+
+        log = new winston.Logger({
+            transports: transports,
+            levels: {
+                error: 0,
+                warn: 1,
+                info: 2,
+                verbose: 3,
+                silly: 4
+            }
+        });
     }
 }
 
