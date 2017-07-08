@@ -11,8 +11,8 @@ homeserver:
 webhookBot:
   # Appearance options for the Matrix bot
   appearance:
-    displayName: "Instagram Bridge"
-    avatarUrl: "http://i.imgur.com/DQKje5W.png" # instagram icon
+    displayName: "Webhook Bridge"
+    avatarUrl: "http://i.imgur.com/IDOBtEJ.png" # webhook icon
 
 # Configuration related to the web portion of the bridge. Handles the inbound webhooks
 web:

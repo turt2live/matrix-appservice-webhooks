@@ -2,6 +2,8 @@ var LogService = require("./src/LogService");
 var Cli = require("matrix-appservice-bridge").Cli;
 var AppServiceRegistration = require("matrix-appservice-bridge").AppServiceRegistration;
 var path = require("path");
+var WebhookStore = require("./src/storage/WebhookStore");
+var WebhookBridge = require("./src/WebhookBridge");
 
 new Cli({
     registrationPath: "appservice-registration-webhooks.yaml",
@@ -56,13 +58,13 @@ new Cli({
     run: function (port, config, registration) {
         LogService.init(config);
         LogService.info("index", "Preparing database...");
-        // InstagramStore.prepare().then(() => {
-        //     log.info("app", "Preparing bridge...");
-        //     var bridge = new InstagramBridge(config, registration);
-        //     bridge.run(port).catch(err => {
-        //         log.error("Init", "Failed to start bridge");
-        //         throw err;
-        //     });
-        // });
+        WebhookStore.prepare().then(() => {
+            LogService.info("index", "Preparing bridge...");
+            var bridge = new WebhookBridge(config, registration);
+            bridge.run(port).catch(err => {
+                LogService.error("Init", "Failed to start bridge");
+                throw err;
+            });
+        });
     }
 }).run();
