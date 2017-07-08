@@ -1,0 +1,29 @@
+# Configuration specific to the application service. All fields (unless otherwise marked) are required.
+homeserver:
+  # The domain for the client-server API calls.
+  url: "http://localhost:8008"
+
+  # The domain part for user IDs on this home server. Usually, but not always, this is the same as the
+  # home server's URL.
+  domain: "localhost"
+
+# Configuration specific to the bridge. All fields (unless otherwise marked) are required.
+webhookBot:
+  # Appearance options for the Matrix bot
+  appearance:
+    displayName: "Instagram Bridge"
+    avatarUrl: "http://i.imgur.com/DQKje5W.png" # instagram icon
+
+# Configuration related to the web portion of the bridge. Handles the inbound webhooks
+web:
+  bind: '0.0.0.0'
+  port: 4501
+
+logging:
+  file: logs/webhook.log
+  console: true
+  consoleLevel: info
+  fileLevel: verbose
+  rotate:
+    size: 52428800 # bytes, default is 50mb
+    count: 5

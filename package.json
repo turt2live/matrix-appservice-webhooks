@@ -1,0 +1,33 @@
+{
+  "name": "matrix-appservice-webhooks",
+  "version": "1.0.0",
+  "description": "Near slack-compatible webhooks for Matrix",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/turt2live/matrix-appservice-webhooks.git"
+  },
+  "keywords": [
+    "matrix",
+    "appservice",
+    "webhook",
+    "webhooks",
+    "slack",
+    "bridge",
+    "integration"
+  ],
+  "author": "Travis Ralston <travis.nathaniel.ralston@gmail.com> (http://travisralston.me)",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/turt2live/matrix-appservice-webhooks/issues"
+  },
+  "homepage": "https://github.com/turt2live/matrix-appservice-webhooks#readme",
+  "dependencies": {
+    "chalk": "^2.0.1",
+    "config": "^1.26.1",
+    "js-yaml": "^3.9.0",
+    "matrix-appservice-bridge": "^1.4.0-a",
+    "moment": "^2.18.1",
+    "winston": "^2.3.1"
+  }
+}
