@@ -53,7 +53,7 @@ The bridge should start working shortly afterwards.
 
 # Usage
 
-Invite the webhook bridge to your room (`@_webhook:t2bot.io`) and send the message `!webhook new`. The bridge bot will then send you a link to send messages to in a private message. You must be able to configure the room in order to set up webhooks.
+Invite the webhook bridge to your room (`@_webhook:t2bot.io`) and send the message `!webhook`. The bridge bot will then send you a link to send messages to in a private message. You must be able to configure the room in order to set up webhooks.
 
 # JSON Body (for posting messages)
 

@@ -78,14 +78,29 @@ class WebhookBridge {
         return this._bridge.getIntentFromLocalpart("_webhook_" + handle);
     }
 
-    /**
-     * Determines if a user is a bridge user (either the bot or virtual)
-     * @param {string} userId the user ID to check
-     * @return {boolean} true if the user ID is a bridge user, false otherwise
-     */
-    isBridgeUser(userId) {
-        var isVirtualUser = userId.indexOf("@_webhook_") === 0 && userId.endsWith(":" + this._bridge.opts.domain);
-        return isVirtualUser || userId == this._bridge.getBot().getUserId();
+    getOrCreateAdminRoom(userId) {
+        var roomIds = _.keys(this._adminRooms);
+        for (var roomId of roomIds) {
+            if (this._adminRooms[roomId].owner === userId)
+                return Promise.resolve(this._adminRooms[roomId]);
+        }
+
+        return this.getBotIntent().createRoom({
+            createAsClient: false, // use bot
+            options: {
+                invite: [userId],
+                is_direct: true,
+                preset: "trusted_private_chat",
+                visibility: "private",
+                initial_state: [{content: {guest_access: "can_join"}, type: "m.room.guest_access", state_key: ""}]
+            }
+        }).then(roomId => {
+            return this._processRoom(roomId).then(() => {
+                var room = this._adminRooms[roomId];
+                if (!room) throw new Error("Could not create admin room for " + userId);
+                return room;
+            });
+        });
     }
 
     /**
@@ -147,7 +162,7 @@ class WebhookBridge {
 
             if (roomMemberIds.length == 2) {
                 var otherUserId = roomMemberIds[botIdx == 0 ? 1 : 0];
-                this._adminRooms[roomId] = new AdminRoom(roomId, this);
+                this._adminRooms[roomId] = new AdminRoom(roomId, this, otherUserId);
                 LogService.verbose("WebhookBridge", "Added admin room for user " + otherUserId);
             } // else it is just a regular room
         });
@@ -186,10 +201,72 @@ class WebhookBridge {
         if (event.type === "m.room.member" && event.content.membership === "invite" && event.state_key === this.getBot().getUserId()) {
             LogService.info("WebhookBridge", event.state_key + " received invite to room " + event.room_id);
             return this._bridge.getIntent(event.state_key).join(event.room_id).then(() => this._processRoom(event.room_id));
+        } else if (event.type === "m.room.message" && event.sender !== this.getBot().getUserId()) {
+            return this._processMessage(event);
         }
 
         // Default
         return Promise.resolve();
+    }
+
+    _processMessage(event) {
+        var message = event.content.body;
+        if (!message.startsWith("!webhook")) return;
+
+        var parts = message.split(" ");
+        var room = event.room_id;
+
+        if (parts[1]) room = parts[1];
+
+        this._hasPermission(event.sender, room).then(permission => {
+            if (!permission) {
+                this.getBotIntent().sendMessage(event.room_id, {
+                    msgtype: "m.notice",
+                    body: "Sorry, you don't have permission to create webhooks for " + (event.room_id === room ? "this room" : room)
+                });
+            } else return this._newWebhook(room, event.sender);
+        }).catch(error => {
+            LogService.error("WebhookBridge", error);
+
+            if(error.errcode === "M_GUEST_ACCESS_FORBIDDEN") {
+                this.getBotIntent().sendMessage(event.room_id, {
+                    msgtype: "m.notice",
+                    body: "Room is not public or not found"
+                });
+            } else {
+                this.getBotIntent().sendMessage(event.room_id, {
+                    msgtype: "m.notice",
+                    body: "There was an error processing your command."
+                });
+            }
+        });
+    }
+
+    _hasPermission(sender, roomId) {
+        return this.getBotIntent().getClient().getStateEvent(roomId, "m.room.power_levels", "").then(powerLevels => {
+            console.log(powerLevels);
+            if (!powerLevels) return false;
+
+            var userPowerLevels = powerLevels['users'] || {};
+
+            var powerLevel = userPowerLevels[sender];
+            if (!powerLevel) powerLevel = powerLevels['users_default'];
+            if (!powerLevel) powerLevel = 0; // default
+
+            var statePowerLevel = powerLevels["state_default"];
+            if (!statePowerLevel) return false;
+
+            return statePowerLevel <= powerLevel;
+        });
+    }
+
+    _newWebhook(roomId, userId) {
+        return this.getOrCreateAdminRoom(userId).then(room => {
+            return this.getBotIntent().sendMessage(room.roomId, {
+                msgtype: "m.notice",
+                body: "This is for the admin room. Congrats on your new webhook in " + roomId
+            });
+        });
     }
 }
 

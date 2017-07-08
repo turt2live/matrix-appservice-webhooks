@@ -13,11 +13,13 @@ class AdminRoom {
      * Creates a new Matrix Admin Room
      * @param {string} roomId the Matrix room ID
      * @param {WebhookBridge} bridge the WebhookBridge bridge
+     * @param {string} owner the owner of the room
      */
-    constructor(roomId, bridge) {
-        this._roomId = roomId;
+    constructor(roomId, bridge, owner) {
+        this.roomId = roomId;
         this._bridge = bridge;
         this._enabled = true;
+        this.owner = owner;
     }
 
     /**
@@ -29,20 +31,20 @@ class AdminRoom {
 
         var bridgeBot = this._bridge.getBotIntent();
         if (event.type === "m.room.member") {
-            this._bridge.getBot().getJoinedMembers(this._roomId).then(members => {
+            this._bridge.getBot().getJoinedMembers(this.roomId).then(members => {
                 var memberIds = _.keys(members);
                 if (memberIds.length > 2) { // should be 2 people, but sometimes our join hasn't landed yet
                     this._enabled = false;
-                    bridgeBot.sendMessage(this._roomId, {
+                    bridgeBot.sendMessage(this.roomId, {
                         msgtype: 'm.notice',
                         body: 'This room is no longer viable as an admin room. Please open a new direct conversation with me to maintain an admin room.'
                     }).then(() => {
-                        return this._bridge.removeAdminRoom(this._roomId);
+                        return this._bridge.removeAdminRoom(this.roomId);
                     });
                 }
-            })
-        } else if (event.type == "m.room.message") {
-            if (this._bridge.isBridgeUser(event.sender)) return;
+            });
+        } else if (event.type === "m.room.message") {
+            if (event.sender === this._bridge.getBot().getUserId()) return;
             this._processMessage(event.sender, event.content.body);
         }
     }
@@ -54,11 +56,7 @@ class AdminRoom {
      * @private
      */
     _processMessage(sender, message) {
-        var bridgeBot = this._bridge.getBotIntent();
-        bridgeBot.sendMessage(this._roomId, {
-            msgtype: "m.notice",
-            body: "You said: " + message
-        });
+        // Nothing to do (yet?)
     }
 }
 
