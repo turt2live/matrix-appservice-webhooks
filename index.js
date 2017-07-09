@@ -53,7 +53,6 @@ new Cli({
         }
 
         registration.addRegexPattern("users", "@_webhook.*", true);
-        registration.addRegexPattern("aliases", "#_webhook.*", true);
 
         callback(registration);
     },
