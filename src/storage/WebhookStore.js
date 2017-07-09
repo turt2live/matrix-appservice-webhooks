@@ -64,16 +64,16 @@ class WebhookStore {
      */
     _bindModels() {
         // Models
-        this.__BotAccountData = this._orm.import(__dirname + "/models/bot_account_data");
+        this.__AccountData = this._orm.import(__dirname + "/models/account_data");
         this.__Webhooks = this._orm.import(__dirname + "/models/webhooks");
     }
 
     /**
-     * Gets the account data for the bridge bot
+     * Gets the account data for the given object
      * @returns {Promise<*>} a json object representing the key/value pairs
      */
-    getBotAccountData() {
-        return this.__BotAccountData.findAll().then(rows => {
+    getAccountData(objectId) {
+        return this.__AccountData.findAll({where: {objectId: objectId}}).then(rows => {
             var container = {};
             for (var row of rows) {
                 container[row.key] = row.value;
@@ -83,17 +83,17 @@ class WebhookStore {
     }
 
     /**
-     * Saves the bridge bot's account data. Takes the value verbatim, expecting a string.
+     * Saves the object's account data. Takes the value verbatim, expecting a string.
      * @param {*} data the data to save
      * @returns {Promise<>} resolves when complete
      */
-    setBotAccountData(data) {
-        return this.__BotAccountData.destroy({where: {}, truncate: true}).then(() => {
+    setAccountData(objectId, data) {
+        return this.__AccountData.destroy({where: {objectId: objectId}, truncate: true}).then(() => {
             var promises = [];
 
             var keys = _.keys(data);
             for (var key of keys) {
-                promises.push(this.__BotAccountData.create({key: key, value: data[key]}));
+                promises.push(this.__AccountData.create({objectId: objectId, key: key, value: data[key]}));
             }
 
             return Promise.all(promises);
@@ -112,6 +112,15 @@ class WebhookStore {
             roomId: roomId,
             userId: userId
         });
+    }
+
+    /**
+     * Gets a webhook from the database by ID
+     * @param {string} hookId the hook ID to lookup
+     * @returns {Promise<Webhook>} resolves to the webhook, or null if not found
+     */
+    getWebhook(hookId) {
+        return this.__Webhooks.findById(hookId).then(hook => hook ? new Webhook(hook) : null);
     }
 }
 

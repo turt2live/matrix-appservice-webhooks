@@ -4,6 +4,7 @@ var AppServiceRegistration = require("matrix-appservice-bridge").AppServiceRegis
 var path = require("path");
 var WebhookStore = require("./src/storage/WebhookStore");
 var WebhookBridge = require("./src/WebhookBridge");
+var WebService = require("./src/WebService");
 
 new Cli({
     registrationPath: "appservice-registration-webhooks.yaml",
@@ -58,13 +59,16 @@ new Cli({
     run: function (port, config, registration) {
         LogService.init(config);
         LogService.info("index", "Preparing database...");
-        WebhookStore.prepare().then(() => {
-            LogService.info("index", "Preparing bridge...");
-            var bridge = new WebhookBridge(config, registration);
-            bridge.run(port).catch(err => {
+        WebhookStore.prepare()
+            .then(() => {
+                LogService.info("index", "Preparing bridge...");
+                var bridge = new WebhookBridge(config, registration);
+                return bridge.run(port);
+            })
+            .then(() => WebService.start(config.web.bind, config.web.port))
+            .catch(err => {
                 LogService.error("Init", "Failed to start bridge");
                 throw err;
             });
-        });
     }
 }).run();

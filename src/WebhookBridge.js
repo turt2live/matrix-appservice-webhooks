@@ -5,6 +5,7 @@ var util = require("./utils");
 var WebhookStore = require("./storage/WebhookStore");
 var Promise = require('bluebird');
 var _ = require('lodash');
+var PubSub = require("pubsub-js");
 
 class WebhookBridge {
     constructor(config, registration) {
@@ -43,6 +44,8 @@ class WebhookBridge {
                 }
             }
         });
+
+        PubSub.subscribe("incoming_webhook", this._postMessage.bind(this));
     }
 
     run(port) {
@@ -81,6 +84,7 @@ class WebhookBridge {
     getOrCreateAdminRoom(userId) {
         var roomIds = _.keys(this._adminRooms);
         for (var roomId of roomIds) {
+            if (!this._adminRooms[roomId]) continue;
             if (this._adminRooms[roomId].owner === userId)
                 return Promise.resolve(this._adminRooms[roomId]);
         }
@@ -94,9 +98,10 @@ class WebhookBridge {
                 visibility: "private",
                 initial_state: [{content: {guest_access: "can_join"}, type: "m.room.guest_access", state_key: ""}]
             }
-        }).then(roomId => {
-            return this._processRoom(roomId).then(() => {
-                var room = this._adminRooms[roomId];
+        }).then(room => {
+            var newRoomId = room.room_id;
+            return this._processRoom(newRoomId, /*adminRoomOwner=*/userId).then(() => {
+                var room = this._adminRooms[newRoomId];
                 if (!room) throw new Error("Could not create admin room for " + userId);
                 return room;
             });
@@ -115,7 +120,7 @@ class WebhookBridge {
 
         var botIntent = this.getBotIntent();
 
-        WebhookStore.getBotAccountData().then(botProfile => {
+        WebhookStore.getAccountData('bridge').then(botProfile => {
             var avatarUrl = botProfile.avatarUrl;
             if (!avatarUrl || avatarUrl !== desiredAvatarUrl) {
                 util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, botIntent).then(mxcUrl => {
@@ -123,7 +128,7 @@ class WebhookBridge {
                     LogService.info("WebhookBridge", "Updating avatar for bridge bot");
                     botIntent.setAvatarUrl(mxcUrl);
                     botProfile.avatarUrl = desiredAvatarUrl;
-                    WebhookStore.setBotAccountData(botProfile);
+                    WebhookStore.setAccountData('bridge', botProfile);
                 });
             }
             botIntent.getProfileInfo(this._bridge.getBot().getUserId(), 'displayname').then(profile => {
@@ -132,6 +137,39 @@ class WebhookBridge {
                     botIntent.setDisplayName(desiredDisplayName);
                 }
             });
+        });
+    }
+
+    /**
+     * Updates a webhook bot's appearance in matrix
+     * @private
+     */
+    _updateHookProfile(intent, desiredDisplayName, desiredAvatarUrl) {
+        LogService.info("WebhookBridge", "Updating appearance of " + intent.getClient().credentials.userId);
+
+        return WebhookStore.getAccountData(intent.getClient().credentials.userId).then(botProfile => {
+            var promises = [];
+
+            var avatarUrl = botProfile.avatarUrl;
+            if ((!avatarUrl || avatarUrl !== desiredAvatarUrl) && desiredAvatarUrl) {
+                promises.push(util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, this.getBotIntent()).then(mxcUrl => {
+                    LogService.verbose("WebhookBridge", "Avatar MXC URL = " + mxcUrl);
+                    LogService.info("WebhookBridge", "Updating avatar for " + intent.getClient().credentials.userId);
+                    return intent.setAvatarUrl(mxcUrl).then(() => {
+                        botProfile.avatarUrl = desiredAvatarUrl;
+                        WebhookStore.setAccountData(intent.getClient().credentials.userId, botProfile);
+                    });
+                }));
+            }
+
+            promises.push(intent.getProfileInfo(intent.getClient().credentials.userId, 'displayname').then(profile => {
+                if (profile.displayname != desiredDisplayName) {
+                    LogService.info("WebhookBridge", "Updating display name from '" + profile.displayname + "' to '" + desiredDisplayName + "' on " + intent.getClient().credentials.userId);
+                    intent.setDisplayName(desiredDisplayName);
+                }
+            }));
+
+            return Promise.all(promises);
         });
     }
 
@@ -151,19 +189,20 @@ class WebhookBridge {
      * Attempts to determine if a room is a bridged room or an admin room, based on the membership and other
      * room information. This will categorize the room accordingly and prepare it for it's purpose.
      * @param {string} roomId the matrix room ID to process
+     * @param {String} [adminRoomOwner] the owner of the admin room. If provided, the room will be forced as an admin room
      * @return {Promise<>} resolves when processing is complete
      * @private
      */
-    _processRoom(roomId) {
+    _processRoom(roomId, adminRoomOwner = null) {
         LogService.info("WebhookBridge", "Request to bridge room " + roomId);
         return this._bridge.getBot().getJoinedMembers(roomId).then(members => {
             var roomMemberIds = _.keys(members);
             var botIdx = roomMemberIds.indexOf(this._bridge.getBot().getUserId());
 
-            if (roomMemberIds.length == 2) {
+            if (roomMemberIds.length == 2 || adminRoomOwner) {
                 var otherUserId = roomMemberIds[botIdx == 0 ? 1 : 0];
-                this._adminRooms[roomId] = new AdminRoom(roomId, this, otherUserId);
-                LogService.verbose("WebhookBridge", "Added admin room for user " + otherUserId);
+                this._adminRooms[roomId] = new AdminRoom(roomId, this, otherUserId || adminRoomOwner);
+                LogService.verbose("WebhookBridge", "Added admin room for user " + (otherUserId || adminRoomOwner));
             } // else it is just a regular room
         });
     }
@@ -224,8 +263,8 @@ class WebhookBridge {
                     msgtype: "m.notice",
                     body: "Sorry, you don't have permission to create webhooks for " + (event.room_id === room ? "this room" : room)
                 });
-            } else return this._newWebhook(room, event.sender).then(() => {
-                if (event.room_id === room) return;
+            } else return this._newWebhook(room, event.sender).then(sentRoomId => {
+                if (event.room_id === sentRoomId) return;
                 this.getBotIntent().sendMessage(event.room_id, {
                     msgtype: "m.notice",
                     body: "I've sent you a direct message with your webhook URL."
@@ -267,7 +306,7 @@ class WebhookBridge {
 
     _newWebhook(roomId, userId) {
         return this.getOrCreateAdminRoom(userId)
-            .then(room => WebhookStore.createWebhook(room.roomId, userId).then(webhook => [webhook, room]))
+            .then(room => WebhookStore.createWebhook(roomId, userId).then(webhook => [webhook, room]))
             .then(result => {
                 var url = "https://TODO.com/" + result[0].id;
                 return this.getBotIntent().sendMessage(result[1].roomId, {
@@ -290,8 +329,30 @@ class WebhookBridge {
                     "}" +
                     "</code></pre>" +
                     "If you run into any issues, visit <a href=\"https://matrix.to/#/#webhooks:t2bot.io\">#webhooks:t2bot.io</a>"
-                });
+                }).then(() => result[1].roomId); // make last promise return the admin room the notification was sent to
             });
+    }
+
+    _postMessage(event, webhookEvent) {
+        var displayName = webhookEvent.payload.username || "Incoming Webhook";
+        var avatarUrl = webhookEvent.payload.avatarUrl || null;
+        var localpart = (webhookEvent.hook.roomId + "_" + displayName).replace(/[^a-zA-Z0-9]/g, '_');
+        var intent = this.getWebhookUserIntent(localpart);
+
+        var postFn = () => {
+            return intent.sendMessage(webhookEvent.hook.roomId, {
+                msgtype: "m.text",
+                body: webhookEvent.payload.text
+            });
+        };
+
+        this._updateHookProfile(intent, displayName, avatarUrl)
+            .then(() => {
+                return intent.join(webhookEvent.hook.roomId).then(postFn, err => {
+                    LogService.error("WebhookBridge", err);
+                    return this.getBotIntent().invite(webhookEvent.hook.roomId, intent.getClient().credentials.userId).then(postFn);
+                });
+            }).catch(error => LogService.error("WebhookBridge", error));
     }
 }
 
