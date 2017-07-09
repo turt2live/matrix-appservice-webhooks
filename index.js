@@ -46,7 +46,7 @@ new Cli({
         registration.setId(AppServiceRegistration.generateToken());
         registration.setHomeserverToken(AppServiceRegistration.generateToken());
         registration.setAppServiceToken(AppServiceRegistration.generateToken());
-        registration.setRateLimited(false); // disabled because Instagram can get spammy
+        registration.setRateLimited(false); // disabled because webhooks can get spammy
 
         if (!registration.getSenderLocalpart()) {
             registration.setSenderLocalpart("_webhook");

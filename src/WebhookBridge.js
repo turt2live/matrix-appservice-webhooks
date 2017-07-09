@@ -8,6 +8,7 @@ var _ = require('lodash');
 var PubSub = require("pubsub-js");
 var WebService = require("./WebService");
 var emoji = require('node-emoji');
+var striptags = require("striptags");
 
 class WebhookBridge {
     constructor(config, registration) {
@@ -348,12 +349,18 @@ class WebhookBridge {
         var localpart = (webhookEvent.hook.roomId + "_" + displayName).replace(/[^a-zA-Z0-9]/g, '_');
         var intent = this.getWebhookUserIntent(localpart);
 
-        var postFn = () => {
-            return intent.sendMessage(webhookEvent.hook.roomId, {
-                msgtype: "m.text",
-                body: convertedMessage
-            });
+        var msgContent = {
+            msgtype: "m.text",
+            body: convertedMessage
         };
+
+        if (webhookEvent.payload.format === "html") {
+            msgContent.format = "org.matrix.custom.html";
+            msgContent.formatted_body = convertedMessage;
+            msgContent.body = striptags(convertedMessage);
+        }
+
+        var postFn = () => intent.sendMessage(webhookEvent.hook.roomId, msgContent);
 
         this._updateHookProfile(intent, displayName, avatarUrl)
             .then(() => {
