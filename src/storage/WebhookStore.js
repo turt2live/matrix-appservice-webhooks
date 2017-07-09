@@ -108,7 +108,7 @@ class WebhookStore {
      */
     createWebhook(roomId, userId) {
         return this.__Webhooks.create({
-            id: randomString({length: 30}),
+            id: randomString({length: 64}),
             roomId: roomId,
             userId: userId
         });

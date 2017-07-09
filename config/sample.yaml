@@ -16,6 +16,7 @@ webhookBot:
 
 # Configuration related to the web portion of the bridge. Handles the inbound webhooks
 web:
+  hookUrlBase: 'http://localhost:4501/'
   bind: '0.0.0.0'
   port: 4501
 

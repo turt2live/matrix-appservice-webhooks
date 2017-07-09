@@ -6,6 +6,7 @@ var WebhookStore = require("./storage/WebhookStore");
 var Promise = require('bluebird');
 var _ = require('lodash');
 var PubSub = require("pubsub-js");
+var WebService = require("./WebService");
 
 class WebhookBridge {
     constructor(config, registration) {
@@ -308,7 +309,7 @@ class WebhookBridge {
         return this.getOrCreateAdminRoom(userId)
             .then(room => WebhookStore.createWebhook(roomId, userId).then(webhook => [webhook, room]))
             .then(result => {
-                var url = "https://TODO.com/" + result[0].id;
+                var url = WebService.getHookUrl(result[0].id);
                 return this.getBotIntent().sendMessage(result[1].roomId, {
                     // TODO: Use an HTML stripper to come up with the plain text version
                     msgtype: "m.notice",

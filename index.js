@@ -26,6 +26,7 @@ new Cli({
                 }
             },
             web: {
+                hookUrlBase: 'http://localhost:4501',
                 bind: "0.0.0.0",
                 port: 4501
             },
@@ -65,7 +66,7 @@ new Cli({
                 var bridge = new WebhookBridge(config, registration);
                 return bridge.run(port);
             })
-            .then(() => WebService.start(config.web.bind, config.web.port))
+            .then(() => WebService.start(config.web.bind, config.web.port, config.web.hookUrlBase))
             .catch(err => {
                 LogService.error("Init", "Failed to start bridge");
                 throw err;

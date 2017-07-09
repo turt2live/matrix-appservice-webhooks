@@ -48,9 +48,16 @@ class WebService {
         });
     }
 
-    start(bindAddress, port) {
+    start(bindAddress, port, baseAddress) {
+        this._baseAddress = baseAddress;
         this._app.listen(port, bindAddress);
         LogService.info("WebService", "API now listening on " + bindAddress + ":" + port);
+    }
+
+    getHookUrl(hookId) {
+        if (this._baseAddress.endsWith("/"))
+            this._baseAddress = this._baseAddress.substring(0, this._baseAddress.length - 1);
+        return this._baseAddress + "/api/v1/matrix/hook/" + hookId;
     }
 }
 
