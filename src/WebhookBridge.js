@@ -7,6 +7,7 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 var PubSub = require("pubsub-js");
 var WebService = require("./WebService");
+var emoji = require('node-emoji');
 
 class WebhookBridge {
     constructor(config, registration) {
@@ -336,6 +337,13 @@ class WebhookBridge {
 
     _postMessage(event, webhookEvent) {
         var displayName = webhookEvent.payload.username || "Incoming Webhook";
+
+        var convertedMessage = webhookEvent.payload.text;
+        if (webhookEvent.payload.emoji !== false) {
+            convertedMessage = emoji.emojify(convertedMessage, /*onMissing=*/null);
+            displayName = emoji.emojify(displayName, /*onMissing=*/null);
+        }
+
         var avatarUrl = webhookEvent.payload.avatarUrl || null;
         var localpart = (webhookEvent.hook.roomId + "_" + displayName).replace(/[^a-zA-Z0-9]/g, '_');
         var intent = this.getWebhookUserIntent(localpart);
@@ -343,7 +351,7 @@ class WebhookBridge {
         var postFn = () => {
             return intent.sendMessage(webhookEvent.hook.roomId, {
                 msgtype: "m.text",
-                body: webhookEvent.payload.text
+                body: convertedMessage
             });
         };
 

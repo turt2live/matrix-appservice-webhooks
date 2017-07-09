@@ -66,4 +66,4 @@ Invite the webhook bridge to your room (`@_webhook:t2bot.io`) and send the messa
 }
 ```
 
-Format can be `plain` or `html`.
+Format can be `plain` or `html`. Emoji will be converted automatically(`:heart:` becomes ❤); set the `emoji` property to `false` to disable this conversion.
