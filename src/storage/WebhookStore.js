@@ -3,6 +3,7 @@ var LogService = require("./../LogService");
 var Sequelize = require('sequelize');
 var dbConfig = require("../../config/database.json");
 var _ = require("lodash");
+var randomString = require('random-string');
 
 /**
  * Primary storage for the Webhook Bridge
@@ -64,6 +65,7 @@ class WebhookStore {
     _bindModels() {
         // Models
         this.__BotAccountData = this._orm.import(__dirname + "/models/bot_account_data");
+        this.__Webhooks = this._orm.import(__dirname + "/models/webhooks");
     }
 
     /**
@@ -97,6 +99,20 @@ class WebhookStore {
             return Promise.all(promises);
         });
     }
+
+    /**
+     * Creates a new webhook
+     * @param {string} roomId the matrix room ID the webhook is for
+     * @param {string} userId the matrix user who created the webhook
+     * @returns {Promise<Webhook>} resolves to the created webhook
+     */
+    createWebhook(roomId, userId) {
+        return this.__Webhooks.create({
+            id: randomString({length: 30}),
+            roomId: roomId,
+            userId: userId
+        });
+    }
 }
 
 /**
@@ -121,6 +137,14 @@ function timestamp(val) {
  */
 function dbToBool(val) {
     return val === 1 || val === true;
+}
+
+class Webhook {
+    constructor(dbFields) {
+        this.id = dbFields.id;
+        this.roomId = dbFields.roomId;
+        this.userId = dbFields.userId;
+    }
 }
 
 module.exports = new WebhookStore();

@@ -224,11 +224,17 @@ class WebhookBridge {
                     msgtype: "m.notice",
                     body: "Sorry, you don't have permission to create webhooks for " + (event.room_id === room ? "this room" : room)
                 });
-            } else return this._newWebhook(room, event.sender);
+            } else return this._newWebhook(room, event.sender).then(() => {
+                if (event.room_id === room) return;
+                this.getBotIntent().sendMessage(event.room_id, {
+                    msgtype: "m.notice",
+                    body: "I've sent you a direct message with your webhook URL."
+                });
+            });
         }).catch(error => {
             LogService.error("WebhookBridge", error);
 
-            if(error.errcode === "M_GUEST_ACCESS_FORBIDDEN") {
+            if (error.errcode === "M_GUEST_ACCESS_FORBIDDEN") {
                 this.getBotIntent().sendMessage(event.room_id, {
                     msgtype: "m.notice",
                     body: "Room is not public or not found"
@@ -244,7 +250,6 @@ class WebhookBridge {
 
     _hasPermission(sender, roomId) {
         return this.getBotIntent().getClient().getStateEvent(roomId, "m.room.power_levels", "").then(powerLevels => {
-            console.log(powerLevels);
             if (!powerLevels) return false;
 
             var userPowerLevels = powerLevels['users'] || {};
@@ -261,12 +266,32 @@ class WebhookBridge {
     }
 
     _newWebhook(roomId, userId) {
-        return this.getOrCreateAdminRoom(userId).then(room => {
-            return this.getBotIntent().sendMessage(room.roomId, {
-                msgtype: "m.notice",
-                body: "This is for the admin room. Congrats on your new webhook in " + roomId
+        return this.getOrCreateAdminRoom(userId)
+            .then(room => WebhookStore.createWebhook(room.roomId, userId).then(webhook => [webhook, room]))
+            .then(result => {
+                var url = "https://TODO.com/" + result[0].id;
+                return this.getBotIntent().sendMessage(result[1].roomId, {
+                    // TODO: Use an HTML stripper to come up with the plain text version
+                    msgtype: "m.notice",
+                    body: "Here's your webhook URL for " + roomId + ": " + url + "\n\nTo send a message, POST the following JSON to that URL:\n\n{\n" +
+                    "    \"text\": \"Hello world!\",\n" +
+                    "    \"format\": \"plain\",\n" +
+                    "    \"displayName\": \"My Cool Webhook\",\n" +
+                    "    \"avatarUrl\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
+                    "}\n\nIf you run into any issues, visit #webhooks:t2bot.io for help.",
+                    format: "org.matrix.custom.html",
+                    formatted_body: "Here's your webhook url for " + roomId + ": <a href=\"" + url + "\">" + url + "</a><br>To send a message, POST the following JSON to that URL:" +
+                    "<pre><code>" +
+                    "{\n" +
+                    "    \"text\": \"Hello world!\",\n" +
+                    "    \"format\": \"plain\",\n" +
+                    "    \"displayName\": \"My Cool Webhook\",\n" +
+                    "    \"avatarUrl\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
+                    "}" +
+                    "</code></pre>" +
+                    "If you run into any issues, visit <a href=\"https://matrix.to/#/#webhooks:t2bot.io\">#webhooks:t2bot.io</a>"
+                });
             });
-        });
     }
 }
 
