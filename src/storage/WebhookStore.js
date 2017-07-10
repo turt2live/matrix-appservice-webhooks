@@ -70,7 +70,8 @@ class WebhookStore {
 
     /**
      * Gets the account data for the given object
-     * @returns {Promise<*>} a json object representing the key/value pairs
+     * @param {string} objectId the object that has account data to look for
+     * @returns {Promise<*>} resolves to a json object representing the key/value pairs
      */
     getAccountData(objectId) {
         return this.__AccountData.findAll({where: {objectId: objectId}}).then(rows => {
@@ -84,6 +85,7 @@ class WebhookStore {
 
     /**
      * Saves the object's account data. Takes the value verbatim, expecting a string.
+     * @param {string} objectId the object this account data belongs to
      * @param {*} data the data to save
      * @returns {Promise<>} resolves when complete
      */
@@ -115,6 +117,25 @@ class WebhookStore {
     }
 
     /**
+     * Lists all of the webhooks for a given room
+     * @param {string} roomId the room ID to search in
+     * @returns {Promise<Webhook[]>} resolves to a list of webhooks, may be empty
+     */
+    listWebhooks(roomId) {
+        return this.__Webhooks.findAll({where: {roomId: roomId}}).then(hooks => _.map(hooks, h => new Webhook(h)));
+    }
+
+    /**
+     * Deletes a webhook from the store
+     * @param {string} roomId the room ID
+     * @param {string} hookId the hook's ID
+     * @returns {Promise<*>} resolves when the hook has been deleted
+     */
+    deleteWebhook(roomId, hookId) {
+        return this.__Webhooks.destroy({where: {roomId: roomId, id: hookId}});
+    }
+
+    /**
      * Gets a webhook from the database by ID
      * @param {string} hookId the hook ID to lookup
      * @returns {Promise<Webhook>} resolves to the webhook, or null if not found
@@ -122,30 +143,6 @@ class WebhookStore {
     getWebhook(hookId) {
         return this.__Webhooks.findById(hookId).then(hook => hook ? new Webhook(hook) : null);
     }
-}
-
-/**
- * Converts a database value to a millisecond timestamp
- * @param {*} val the value from the database
- * @return {number} a millisecond timestamp representing the date
- */
-function timestamp(val) {
-    if (typeof(val) === 'number') {
-        return val;
-    } else if (typeof(val) === 'string') {
-        return new Date(val).getTime();
-    } else if (!val || !val.getTime) {
-        return new Date(0).getTime();
-    } else return val;
-}
-
-/**
- * Converts a database value to a boolean
- * @param {*} val the value from the database
- * @return {boolean} the boolean
- */
-function dbToBool(val) {
-    return val === 1 || val === true;
 }
 
 class Webhook {

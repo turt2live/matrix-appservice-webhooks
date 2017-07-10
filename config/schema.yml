@@ -1,6 +1,11 @@
 "$schema": "http://json-schema.org/draft-04/schema#"
 type: "object"
 properties:
+  provisioning:
+    type: "object"
+    properties:
+      secret:
+        type: "string"
   homeserver:
     type: "object"
     properties:

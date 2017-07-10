@@ -9,6 +9,9 @@ var PubSub = require("pubsub-js");
 var WebService = require("./WebService");
 var emoji = require('node-emoji');
 var striptags = require("striptags");
+var ProvisioningService = require("./provisioning/ProvisioningService");
+
+// TODO: Convert this class to be a coordination layer instead of an all-in-one
 
 class WebhookBridge {
     constructor(config, registration) {
@@ -54,6 +57,7 @@ class WebhookBridge {
     run(port) {
         LogService.info("WebhookBridge", "Starting bridge");
         return this._bridge.run(port, this._config)
+            .then(() => ProvisioningService.setClient(this.getBotIntent()))
             .then(() => this._updateBotProfile())
             .then(() => this._bridgeKnownRooms())
             .catch(error => LogService.error("WebhookBridge", error));
@@ -260,20 +264,42 @@ class WebhookBridge {
 
         if (parts[1]) room = parts[1];
 
-        this._hasPermission(event.sender, room).then(permission => {
-            if (!permission) {
-                this.getBotIntent().sendMessage(event.room_id, {
+        ProvisioningService.createWebhook(room, event.sender).then(webhook => {
+            return this.getOrCreateAdminRoom(event.sender).then(adminRoom => {
+                var url = WebService.getHookUrl(webhook.id);
+                var htmlMessage = "Here's your webhook url for " + room + ": <a href=\"" + url + "\">" + url + "</a><br>To send a message, POST the following JSON to that URL:" +
+                    "<pre><code>" +
+                    "{\n" +
+                    "    \"text\": \"Hello world!\",\n" +
+                    "    \"format\": \"plain\",\n" +
+                    "    \"displayName\": \"My Cool Webhook\",\n" +
+                    "    \"avatarUrl\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
+                    "}" +
+                    "</code></pre>" +
+                    "If you run into any issues, visit <a href=\"https://matrix.to/#/#webhooks:t2bot.io\">#webhooks:t2bot.io</a>";
+
+                return this.getBotIntent().sendMessage(adminRoom.roomId, {
                     msgtype: "m.notice",
-                    body: "Sorry, you don't have permission to create webhooks for " + (event.room_id === room ? "this room" : room)
-                });
-            } else return this._newWebhook(room, event.sender).then(sentRoomId => {
-                if (event.room_id === sentRoomId) return;
-                this.getBotIntent().sendMessage(event.room_id, {
-                    msgtype: "m.notice",
-                    body: "I've sent you a direct message with your webhook URL."
+                    body: striptags(htmlMessage),
+                    format: "org.matrix.custom.html",
+                    formatted_body: htmlMessage
+                }).then(() => {
+                    if (adminRoom.roomId != room) {
+                        return this.getBotIntent().sendMessage(room, {
+                            msgtype: "m.notice",
+                            body: "I've sent you a private message with your hook information"
+                        });
+                    }
                 });
             });
         }).catch(error => {
+            if (error === ProvisioningService.PERMISSION_ERROR_MESSAGE) {
+                return this.getBotIntent().sendMessage(event.room_id, {
+                    msgtype: "m.notice",
+                    body: "Sorry, you don't have permission to create webhooks for " + (event.room_id === room ? "this room" : room)
+                });
+            }
+
             LogService.error("WebhookBridge", error);
 
             if (error.errcode === "M_GUEST_ACCESS_FORBIDDEN") {
@@ -288,52 +314,6 @@ class WebhookBridge {
                 });
             }
         });
-    }
-
-    _hasPermission(sender, roomId) {
-        return this.getBotIntent().getClient().getStateEvent(roomId, "m.room.power_levels", "").then(powerLevels => {
-            if (!powerLevels) return false;
-
-            var userPowerLevels = powerLevels['users'] || {};
-
-            var powerLevel = userPowerLevels[sender];
-            if (!powerLevel) powerLevel = powerLevels['users_default'];
-            if (!powerLevel) powerLevel = 0; // default
-
-            var statePowerLevel = powerLevels["state_default"];
-            if (!statePowerLevel) return false;
-
-            return statePowerLevel <= powerLevel;
-        });
-    }
-
-    _newWebhook(roomId, userId) {
-        return this.getOrCreateAdminRoom(userId)
-            .then(room => WebhookStore.createWebhook(roomId, userId).then(webhook => [webhook, room]))
-            .then(result => {
-                var url = WebService.getHookUrl(result[0].id);
-                return this.getBotIntent().sendMessage(result[1].roomId, {
-                    // TODO: Use an HTML stripper to come up with the plain text version
-                    msgtype: "m.notice",
-                    body: "Here's your webhook URL for " + roomId + ": " + url + "\n\nTo send a message, POST the following JSON to that URL:\n\n{\n" +
-                    "    \"text\": \"Hello world!\",\n" +
-                    "    \"format\": \"plain\",\n" +
-                    "    \"displayName\": \"My Cool Webhook\",\n" +
-                    "    \"avatarUrl\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
-                    "}\n\nIf you run into any issues, visit #webhooks:t2bot.io for help.",
-                    format: "org.matrix.custom.html",
-                    formatted_body: "Here's your webhook url for " + roomId + ": <a href=\"" + url + "\">" + url + "</a><br>To send a message, POST the following JSON to that URL:" +
-                    "<pre><code>" +
-                    "{\n" +
-                    "    \"text\": \"Hello world!\",\n" +
-                    "    \"format\": \"plain\",\n" +
-                    "    \"displayName\": \"My Cool Webhook\",\n" +
-                    "    \"avatarUrl\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
-                    "}" +
-                    "</code></pre>" +
-                    "If you run into any issues, visit <a href=\"https://matrix.to/#/#webhooks:t2bot.io\">#webhooks:t2bot.io</a>"
-                }).then(() => result[1].roomId); // make last promise return the admin room the notification was sent to
-            });
     }
 
     _postMessage(event, webhookEvent) {

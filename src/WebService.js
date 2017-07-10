@@ -3,6 +3,10 @@ var bodyParser = require("body-parser");
 var LogService = require("./LogService");
 var PubSub = require('pubsub-js');
 var WebhookStore = require("./storage/WebhookStore");
+var ProvisioningService = require("./provisioning/ProvisioningService");
+var _ = require("lodash");
+
+// TODO: Migrate provisioning API out of this class
 
 class WebService {
     constructor() {
@@ -16,6 +20,11 @@ class WebService {
         });
 
         this._app.post("/api/v1/matrix/hook/:hookId", this._postWebhook.bind(this));
+
+        // Provisioning API
+        this._app.put("/api/v1/provision/:roomId/hook", this._provisionHook.bind(this));
+        this._app.get("/api/v1/provision/:roomId/hooks", this._listHooks.bind(this));
+        this._app.delete("/api/v1/provision/:roomId/hook/:hookId", this._deleteHook.bind(this));
     }
 
     _postWebhook(request, response) {
@@ -46,6 +55,84 @@ class WebService {
             LogService.error("WebService [Hook " + request.params.hookId + "]", error);
             response.status(500).send({error: 'Unknown error processing webhook', success: false});
         });
+    }
+
+    _provisioningApiTest(roomId, userId, token, response, hookId = null, expectingHookId = false) {
+        if (!roomId || !userId || !token || (!hookId && expectingHookId)) {
+            response.status(400).send({success: false, message: ProvisioningService.PERMISSION_ERROR_MESSAGE});
+            return false;
+        }
+
+        if (!this._token || this._token !== token) {
+            response.status(403).send({success: false, message: ProvisioningService.PERMISSION_ERROR_MESSAGE});
+            return false;
+        }
+
+        return true;
+    }
+
+    _provisioningApiWebhook(webhook) {
+        return {
+            id: webhook.id,
+            userId: webhook.userId,
+            roomId: webhook.roomId,
+            url: this.getHookUrl(webhook.id)
+        };
+    }
+
+    _provisioningApiCatch(error, response) {
+        if (error === ProvisioningService.PERMISSION_ERROR_MESSAGE) {
+            response.status(400).send({success: false, message: error});
+            return;
+        }
+
+        LogService.error("WebService", error);
+        response.status(500).send({success: false, message: "Unknown error processing request"});
+    }
+
+    _provisionHook(request, response) {
+        var roomId = request.params.roomId;
+        var userId = request.query.userId;
+        var token = request.query.token;
+
+        if (!this._provisioningApiTest(roomId, userId, token, response)) return;
+
+        ProvisioningService.createWebhook(roomId, userId).then(webhook => {
+            LogService.info("WebService", "Webhook created with provisioning api: " + webhook.id);
+            response.status(200).send(this._provisioningApiWebhook(webhook));
+        }).catch(error => this._provisioningApiCatch(error, response));
+    }
+
+    _listHooks(request, response) {
+        var roomId = request.params.roomId;
+        var userId = request.query.userId;
+        var token = request.query.token;
+
+        if (!this._provisioningApiTest(roomId, userId, token, response)) return;
+
+        ProvisioningService.getWebhooks(roomId, userId).then(webhooks => {
+            response.status(200).send({
+                success: true,
+                results: _.map(webhooks, h => this._provisioningApiWebhook(h))
+            });
+        }).catch(error => this._provisioningApiCatch(error, response));
+    }
+
+    _deleteHook(request, response) {
+        var hookId = request.params.hookId;
+        var roomId = request.params.roomId;
+        var userId = request.query.userId;
+        var token = request.query.token;
+
+        if (!this._provisioningApiTest(roomId, userId, token, response, hookId, true)) return;
+
+        ProvisioningService.deleteWebhook(roomId, userId, hookId).then(() => {
+            response.status(200).send({success: true});
+        }).catch(error => this._provisioningApiCatch(error, response));
+    }
+
+    setSharedToken(token) {
+        this._token = token;
     }
 
     start(bindAddress, port, baseAddress) {

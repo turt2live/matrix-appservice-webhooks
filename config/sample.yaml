@@ -14,6 +14,11 @@ webhookBot:
     displayName: "Webhook Bridge"
     avatarUrl: "http://i.imgur.com/IDOBtEJ.png" # webhook icon
 
+# Provisioning API options
+provisioning:
+  # Your secret for the API. Required for all provisioning API requests.
+  secret: 'CHANGE_ME'
+
 # Configuration related to the web portion of the bridge. Handles the inbound webhooks
 web:
   hookUrlBase: 'http://localhost:4501/'

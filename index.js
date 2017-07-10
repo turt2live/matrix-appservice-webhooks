@@ -30,6 +30,9 @@ new Cli({
                 bind: "0.0.0.0",
                 port: 4501
             },
+            provisioning: {
+                secret: 'CHANGE_ME'
+            },
             logging: {
                 file: "logs/webhook.log",
                 console: true,
@@ -65,7 +68,11 @@ new Cli({
                 var bridge = new WebhookBridge(config, registration);
                 return bridge.run(port);
             })
-            .then(() => WebService.start(config.web.bind, config.web.port, config.web.hookUrlBase))
+            .then(() => {
+                if (config.provisioning.secret !== "CHANGE_ME") WebService.setSharedToken(config.provisioning.secret);
+                else LogService.warn("index", "No provisioning API token is set - the provisioning API will not work for this bridge");
+                return WebService.start(config.web.bind, config.web.port, config.web.hookUrlBase)
+            })
             .catch(err => {
                 LogService.error("Init", "Failed to start bridge");
                 throw err;
