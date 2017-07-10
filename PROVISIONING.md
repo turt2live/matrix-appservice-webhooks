@@ -2,8 +2,6 @@
 
 **Note to users of the provisioning API:** The bridge will only work in rooms that it is able to see. Invite the bridge bot (`@_webhook:yourdomain.com`) to the room prior to modifying or querying state.
 
-View the API in [Postman](https://documenter.getpostman.com/view/1707443/matrix-webhooks/6fYShpU).
-
 ## Endpoints
 
 All endpoints use the following format for errors (anything not in the 2xx range):
@@ -18,7 +16,7 @@ All endpoints also require the query parameter `token` with the value being the 
 
 ### `PUT /api/v1/provision/{roomId}/hook?userId={userId}`
 
-Creates a new webhook for a room.
+Creates a new incoming webhook for a room. Outgoing webhooks are not yet supported by the bridge.
 
 **Inputs**
 
@@ -35,7 +33,8 @@ Creates a new webhook for a room.
   "id": "some_long_string",
   "url": "https://webhook.t2bot.io/api/v1/matrix/hook/some_long_string",
   "userId": "@travis:t2l.io",
-  "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org"
+  "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org",
+  "type": "incoming"
 }
 ```
 
@@ -64,13 +63,15 @@ Lists the webhooks created for a room. Will return an empty collection if no web
       "id": "some_long_string",
       "url": "https://webhook.t2bot.io/api/v1/matrix/hook/some_long_string",
       "userId": "@travis:t2l.io",
-      "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org"
+      "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org",
+      "type": "incoming"
     },
     {
       "id": "another_long_string",
       "url": "https://webhook.t2bot.io/api/v1/matrix/hook/another_long_string",
       "userId": "@turt2live:matrix.org",
-      "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org"
+      "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org",
+      "type": "incoming"
     }
   ]
 }

@@ -76,7 +76,8 @@ class WebService {
             id: webhook.id,
             userId: webhook.userId,
             roomId: webhook.roomId,
-            url: this.getHookUrl(webhook.id)
+            url: this.getHookUrl(webhook.id),
+            type: "incoming", // we don't actually support anything else, this is just in case we do in the future.
         };
     }
 
