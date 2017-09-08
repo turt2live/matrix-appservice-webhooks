@@ -1,7 +1,7 @@
 {
   "name": "matrix-appservice-webhooks",
   "version": "1.0.0",
-  "description": "Near slack-compatible webhooks for Matrix",
+  "description": "Slack-compatible webhooks for Matrix",
   "main": "index.js",
   "repository": {
     "type": "git",
