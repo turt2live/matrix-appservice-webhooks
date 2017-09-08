@@ -4,8 +4,20 @@ var PubSub = require("pubsub-js");
 class WebhookReceiver {
     constructor() {
         this._layers = [
-            require("./layers/emoji"),
-            require("./layers/html"),
+            // Avatar
+            require("./layers/avatar/from_webhook"),
+            require("./layers/avatar/slack_icon_url"),
+            require("./layers/avatar/default"),
+
+            // Display Name
+            require("./layers/displayName/from_webhook"),
+            require("./layers/displayName/slack"),
+            require("./layers/displayName/default"),
+
+            // Message
+            require("./layers/message/from_webhook"),
+            require("./layers/message/emoji"),
+            require("./layers/message/html"),
         ];
 
         PubSub.subscribe("incoming_webhook", this._postMessage.bind(this));
@@ -21,17 +33,15 @@ class WebhookReceiver {
     }
 
     _postMessage(event, webhookEvent) {
+        // Note: The payload is intentionally blank. This is for IDE autocomplete. The values will be populated by the layers.
         var matrixPayload = {
             event: {
-                body: webhookEvent.payload.text,
+                body: null,
                 msgtype: "m.text",
             },
             sender: {
-                // username is slack
-                displayName: webhookEvent.payload.username || webhookEvent.payload.displayName || "Incoming Webhook",
-
-                // icon_url is slack
-                avatarUrl: webhookEvent.payload.icon_url || webhookEvent.payload.avatarUrl || null,
+                displayName: null,
+                avatarUrl: null,
             }
         };
 
