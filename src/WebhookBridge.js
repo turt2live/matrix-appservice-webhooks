@@ -7,11 +7,10 @@ var Promise = require('bluebird');
 var _ = require('lodash');
 var PubSub = require("pubsub-js");
 var WebService = require("./WebService");
-var emoji = require('node-emoji');
 var striptags = require("striptags");
+var emoji = require('node-emoji');
 var ProvisioningService = require("./provisioning/ProvisioningService");
-
-// TODO: Convert this class to be a coordination layer instead of an all-in-one
+var InteractiveProvisioner = require("./provisioning/InteractiveProvisioner");
 
 class WebhookBridge {
     constructor(config, registration) {
@@ -58,6 +57,8 @@ class WebhookBridge {
         LogService.info("WebhookBridge", "Starting bridge");
         return this._bridge.run(port, this._config)
             .then(() => ProvisioningService.setClient(this.getBotIntent()))
+            .then(() => InteractiveProvisioner.setClient(this.getBotIntent()))
+            .then(() => InteractiveProvisioner.setBridge(this))
             .then(() => this._updateBotProfile())
             .then(() => this._bridgeKnownRooms())
             .catch(error => LogService.error("WebhookBridge", error));
@@ -258,64 +259,15 @@ class WebhookBridge {
     _processMessage(event) {
         var message = event.content.body;
         if (!message || !message.startsWith("!webhook")) return;
-
         var parts = message.split(" ");
         var room = event.room_id;
 
         if (parts[1]) room = parts[1];
 
-        ProvisioningService.createWebhook(room, event.sender).then(webhook => {
-            return this.getOrCreateAdminRoom(event.sender).then(adminRoom => {
-                var url = WebService.getHookUrl(webhook.id);
-                var htmlMessage = "Here's your webhook url for " + room + ": <a href=\"" + url + "\">" + url + "</a><br>To send a message, POST the following JSON to that URL:" +
-                    "<pre><code>" +
-                    "{\n" +
-                    "    \"text\": \"Hello world!\",\n" +
-                    "    \"format\": \"plain\",\n" +
-                    "    \"displayName\": \"My Cool Webhook\",\n" +
-                    "    \"avatarUrl\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
-                    "}" +
-                    "</code></pre>" +
-                    "If you run into any issues, visit <a href=\"https://matrix.to/#/#webhooks:t2bot.io\">#webhooks:t2bot.io</a>";
-
-                return this.getBotIntent().sendMessage(adminRoom.roomId, {
-                    msgtype: "m.notice",
-                    body: striptags(htmlMessage),
-                    format: "org.matrix.custom.html",
-                    formatted_body: htmlMessage
-                }).then(() => {
-                    if (adminRoom.roomId != room) {
-                        return this.getBotIntent().sendMessage(room, {
-                            msgtype: "m.notice",
-                            body: "I've sent you a private message with your hook information"
-                        });
-                    }
-                });
-            });
-        }).catch(error => {
-            if (error === ProvisioningService.PERMISSION_ERROR_MESSAGE) {
-                return this.getBotIntent().sendMessage(event.room_id, {
-                    msgtype: "m.notice",
-                    body: "Sorry, you don't have permission to create webhooks for " + (event.room_id === room ? "this room" : room)
-                });
-            }
-
-            LogService.error("WebhookBridge", error);
-
-            if (error.errcode === "M_GUEST_ACCESS_FORBIDDEN") {
-                this.getBotIntent().sendMessage(event.room_id, {
-                    msgtype: "m.notice",
-                    body: "Room is not public or not found"
-                });
-            } else {
-                this.getBotIntent().sendMessage(event.room_id, {
-                    msgtype: "m.notice",
-                    body: "There was an error processing your command."
-                });
-            }
-        });
+        InteractiveProvisioner.createWebhook(event.sender, room, event.room_id);
     }
 
+    // TODO: Move this to a webhook parser thing
     _postMessage(event, webhookEvent) {
         var displayName = webhookEvent.payload.username || webhookEvent.payload.displayName || "Incoming Webhook";
 
