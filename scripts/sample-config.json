@@ -1,0 +1,17 @@
+{
+  "logging": {
+    "file": "logs/webhook-scripts.log",
+    "console": true,
+    "consoleLevel": "info",
+    "fileLevel": "silly",
+    "rotate": {
+      "size": 52428800,
+      "count": 5
+    }
+  },
+  "matrix": {
+    "baseUrl": "https://t2bot.io",
+    "accessToken": "YOUR_TOKEN_HERE",
+    "userId": "@someone:t2bot.io"
+  }
+}
