@@ -317,7 +317,7 @@ class WebhookBridge {
     }
 
     _postMessage(event, webhookEvent) {
-        var displayName = webhookEvent.payload.username || "Incoming Webhook";
+        var displayName = webhookEvent.payload.username || webhookEvent.payload.displayName || "Incoming Webhook";
 
         var convertedMessage = webhookEvent.payload.text;
         if (webhookEvent.payload.emoji !== false) {
