@@ -11,21 +11,13 @@ class InteractiveProvisioner {
     }
 
     /**
-     * Sets the intent object to use for permission checking
-     * @param {Intent} intent the intent to use
-     */
-    setClient(intent) {
-        LogService.verbose("InteractiveProvisioner", "Received intent. Using account " + intent.getClient().credentials.userId);
-        this._intent = intent;
-    }
-
-    /**
      * Sets the bridge to interact with
      * @param {WebhookBridge} bridge the bridge to use
      */
     setBridge(bridge) {
-        LogService.verbose("InteractiveProvisioner", "Received bridge");
+        LogService.verbose("InteractiveProvisioner", "Received bridge. Using default bot intent");
         this._bridge = bridge;
+        this._intent = this._bridge.getBotIntent();
     }
 
     /**

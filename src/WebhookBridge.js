@@ -5,12 +5,10 @@ var util = require("./utils");
 var WebhookStore = require("./storage/WebhookStore");
 var Promise = require('bluebird');
 var _ = require('lodash');
-var PubSub = require("pubsub-js");
 var WebService = require("./WebService");
-var striptags = require("striptags");
-var emoji = require('node-emoji');
 var ProvisioningService = require("./provisioning/ProvisioningService");
 var InteractiveProvisioner = require("./provisioning/InteractiveProvisioner");
+var WebhookReceiver = require("./processing/WebhookReceiver");
 
 class WebhookBridge {
     constructor(config, registration) {
@@ -49,16 +47,15 @@ class WebhookBridge {
                 }
             }
         });
-
-        PubSub.subscribe("incoming_webhook", this._postMessage.bind(this));
     }
 
     run(port) {
         LogService.info("WebhookBridge", "Starting bridge");
         return this._bridge.run(port, this._config)
+        // TODO: There must be a better way to do this
             .then(() => ProvisioningService.setClient(this.getBotIntent()))
-            .then(() => InteractiveProvisioner.setClient(this.getBotIntent()))
             .then(() => InteractiveProvisioner.setBridge(this))
+            .then(() => WebhookReceiver.setBridge(this))
             .then(() => this._updateBotProfile())
             .then(() => this._bridgeKnownRooms())
             .catch(error => LogService.error("WebhookBridge", error));
@@ -150,9 +147,8 @@ class WebhookBridge {
 
     /**
      * Updates a webhook bot's appearance in matrix
-     * @private
      */
-    _updateHookProfile(intent, desiredDisplayName, desiredAvatarUrl) {
+    updateHookProfile(intent, desiredDisplayName, desiredAvatarUrl) {
         LogService.info("WebhookBridge", "Updating appearance of " + intent.getClient().credentials.userId);
 
         return WebhookStore.getAccountData(intent.getClient().credentials.userId).then(botProfile => {
@@ -259,48 +255,12 @@ class WebhookBridge {
     _processMessage(event) {
         var message = event.content.body;
         if (!message || !message.startsWith("!webhook")) return;
+
         var parts = message.split(" ");
         var room = event.room_id;
-
         if (parts[1]) room = parts[1];
 
         InteractiveProvisioner.createWebhook(event.sender, room, event.room_id);
-    }
-
-    // TODO: Move this to a webhook parser thing
-    _postMessage(event, webhookEvent) {
-        var displayName = webhookEvent.payload.username || webhookEvent.payload.displayName || "Incoming Webhook";
-
-        var convertedMessage = webhookEvent.payload.text;
-        if (webhookEvent.payload.emoji !== false) {
-            convertedMessage = emoji.emojify(convertedMessage, /*onMissing=*/null);
-            displayName = emoji.emojify(displayName, /*onMissing=*/null);
-        }
-
-        var avatarUrl = webhookEvent.payload.avatarUrl || null;
-        var localpart = (webhookEvent.hook.roomId + "_" + displayName).replace(/[^a-zA-Z0-9]/g, '_');
-        var intent = this.getWebhookUserIntent(localpart);
-
-        var msgContent = {
-            msgtype: "m.text",
-            body: convertedMessage
-        };
-
-        if (webhookEvent.payload.format === "html") {
-            msgContent.format = "org.matrix.custom.html";
-            msgContent.formatted_body = convertedMessage;
-            msgContent.body = striptags(convertedMessage);
-        }
-
-        var postFn = () => intent.sendMessage(webhookEvent.hook.roomId, msgContent);
-
-        this._updateHookProfile(intent, displayName, avatarUrl)
-            .then(() => {
-                return intent.join(webhookEvent.hook.roomId).then(postFn, err => {
-                    LogService.error("WebhookBridge", err);
-                    return this.getBotIntent().invite(webhookEvent.hook.roomId, intent.getClient().credentials.userId).then(postFn);
-                });
-            }).catch(error => LogService.error("WebhookBridge", error));
     }
 }
 
