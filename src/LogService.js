@@ -32,8 +32,14 @@ function getTimestamp() {
 }
 
 var log = null;
+var defaultModule = null;
 
 function doLog(level, module, messageOrObject) {
+    if (!messageOrObject && defaultModule) {
+        messageOrObject = module;
+        module = defaultModule;
+    }
+
     if (typeof(messageOrObject) === 'object' && !(messageOrObject instanceof Error))
         messageOrObject = JSON.stringify(messageOrObject);
 
@@ -47,6 +53,10 @@ function doLog(level, module, messageOrObject) {
 }
 
 class LogService {
+    static defaultModule(module) {
+        defaultModule = module;
+    }
+
     static info(module, message) {
         doLog('info', module, message);
     }
