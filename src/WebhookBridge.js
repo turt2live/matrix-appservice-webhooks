@@ -156,7 +156,11 @@ class WebhookBridge {
 
             var avatarUrl = botProfile.avatarUrl;
             if ((!avatarUrl || avatarUrl !== desiredAvatarUrl) && desiredAvatarUrl) {
-                promises.push(util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, this.getBotIntent()).then(mxcUrl => {
+                var uploadPromise = Promise.resolve(desiredAvatarUrl);
+                if (!desiredAvatarUrl.startsWith("mxc://"))
+                    uploadPromise = util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, this.getBotIntent());
+
+                promises.push(uploadPromise.then(mxcUrl => {
                     LogService.verbose("WebhookBridge", "Avatar MXC URL = " + mxcUrl);
                     LogService.info("WebhookBridge", "Updating avatar for " + intent.getClient().credentials.userId);
                     return intent.setAvatarUrl(mxcUrl).then(() => {

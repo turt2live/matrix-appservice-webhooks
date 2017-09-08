@@ -20,15 +20,18 @@ class WebhookReceiver {
         this._bridge = bridge;
     }
 
-    _postMessage(event, webhookEvent){
+    _postMessage(event, webhookEvent) {
         var matrixPayload = {
             event: {
                 body: webhookEvent.payload.text,
-                msgtype: "m.text"
+                msgtype: "m.text",
             },
             sender: {
+                // username is slack
                 displayName: webhookEvent.payload.username || webhookEvent.payload.displayName || "Incoming Webhook",
-                avatarUrl: webhookEvent.payload.avatarUrl || null
+
+                // icon_url is slack
+                avatarUrl: webhookEvent.payload.icon_url || webhookEvent.payload.avatarUrl || null,
             }
         };
 

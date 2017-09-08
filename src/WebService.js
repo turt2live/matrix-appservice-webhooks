@@ -12,6 +12,7 @@ class WebService {
     constructor() {
         this._app = express();
         this._app.use(bodyParser.json());
+        this._app.use(bodyParser.urlencoded());
 
         // Logging incoming requests
         this._app.use((req, res, next) => {
@@ -29,6 +30,10 @@ class WebService {
 
     _postWebhook(request, response) {
         response.setHeader("Content-Type", "application/json");
+
+        if (request.headers['content-type'].toLowerCase() === 'application/x-www-form-urlencoded') {
+           request.body = JSON.parse(request.body.payload || "{}");
+        }
 
         var hookInfo = request.body;
         if (!hookInfo || !hookInfo["text"]) {
