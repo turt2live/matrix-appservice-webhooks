@@ -7,6 +7,7 @@ class WebhookReceiver {
             // Avatar
             require("./layers/avatar/from_webhook"),
             require("./layers/avatar/slack_icon_url"),
+            require("./layers/avatar/slack_icon_emoji"),
             require("./layers/avatar/default"),
 
             // Display Name

@@ -7,9 +7,6 @@
     "type": "git",
     "url": "git+https://github.com/turt2live/matrix-appservice-webhooks.git"
   },
-  "scripts": {
-    "emoji_to_mxc": "node scripts/emoji_to_mxc.js"
-  },
   "keywords": [
     "matrix",
     "appservice",
@@ -29,8 +26,10 @@
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "chalk": "^2.0.1",
+    "cheerio": "^1.0.0-rc.2",
     "db-migrate": "^0.10.0-beta.20",
     "db-migrate-sqlite3": "^0.2.1",
+    "emojione": "^3.1.2",
     "express": "^4.15.3",
     "lodash": "^4.17.4",
     "matrix-appservice-bridge": "^1.4.0-a",
@@ -48,9 +47,5 @@
     "uuid": "^3.1.0",
     "winston": "^2.3.1"
   },
-  "optionalDependencies": {
-    "babel-preset-es2015": "^6.24.1",
-    "emojione-assets": "^3.1.1",
-    "matrix-js-sdk": "^0.8.2"
-  }
+  "optionalDependencies": {}
 }
