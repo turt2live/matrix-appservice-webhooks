@@ -257,7 +257,7 @@ class WebhookBridge {
 
     _processMessage(event) {
         var message = event.content.body;
-        if (!message.startsWith("!webhook")) return;
+        if (!message || !message.startsWith("!webhook")) return;
 
         var parts = message.split(" ");
         var room = event.room_id;
