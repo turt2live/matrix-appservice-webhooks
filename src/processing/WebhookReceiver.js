@@ -1,5 +1,6 @@
 var LogService = require("../LogService");
 var PubSub = require("pubsub-js");
+var Promise = require("bluebird");
 
 class WebhookReceiver {
     constructor() {
@@ -14,6 +15,7 @@ class WebhookReceiver {
             require("./layers/displayName/from_webhook"),
             require("./layers/displayName/slack"),
             require("./layers/displayName/default"),
+            require("./layers/displayName/emoji"),
 
             // Message
             require("./layers/message/from_webhook"),
@@ -47,20 +49,23 @@ class WebhookReceiver {
         };
 
         // Apply filtering on the content
-        this._layers.map(a => a(webhookEvent.payload, matrixPayload));
+        var layerChain = Promise.resolve();
+        this._layers.map(a => layerChain = layerChain.then(() => a(webhookEvent.payload, matrixPayload)));
 
-        var localpart = (webhookEvent.hook.roomId + "_" + matrixPayload.sender.displayName).replace(/[^a-zA-Z0-9]/g, '_');
-        var intent = this._bridge.getWebhookUserIntent(localpart);
+        layerChain.then(() => {
+            var localpart = (webhookEvent.hook.roomId + "_" + matrixPayload.sender.displayName).replace(/[^a-zA-Z0-9]/g, '_');
+            var intent = this._bridge.getWebhookUserIntent(localpart);
 
-        // Update profile, try join, fall back to invite, and try to send message
-        var postFn = () => intent.sendMessage(webhookEvent.hook.roomId, matrixPayload.event);
-        this._bridge.updateHookProfile(intent, matrixPayload.sender.displayName, matrixPayload.sender.avatarUrl)
-            .then(() => {
-                return intent.join(webhookEvent.hook.roomId).then(postFn, err => {
-                    LogService.error("WebhookReceiver", err);
-                    return this._bridge.getBotIntent().invite(webhookEvent.hook.roomId, intent.getClient().credentials.userId).then(postFn);
-                });
-            }).catch(error => LogService.error("WebhookReceiver", error));
+            // Update profile, try join, fall back to invite, and try to send message
+            var postFn = () => intent.sendMessage(webhookEvent.hook.roomId, matrixPayload.event);
+            this._bridge.updateHookProfile(intent, matrixPayload.sender.displayName, matrixPayload.sender.avatarUrl)
+                .then(() => {
+                    return intent.join(webhookEvent.hook.roomId).then(postFn, err => {
+                        LogService.error("WebhookReceiver", err);
+                        return this._bridge.getBotIntent().invite(webhookEvent.hook.roomId, intent.getClient().credentials.userId).then(postFn);
+                    });
+                }).catch(error => LogService.error("WebhookReceiver", error));
+        });
     }
 
 }

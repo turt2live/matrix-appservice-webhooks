@@ -1,4 +1,3 @@
-var Promise = require("bluebird");
 var striptags = require("striptags");
 
 module.exports = (webhook, matrix) => {
@@ -7,6 +6,4 @@ module.exports = (webhook, matrix) => {
         matrix.event.formatted_body = matrix.event.body;
         matrix.event.body = striptags(matrix.event.formatted_body);
     }
-
-    return Promise.resolve();
 };
