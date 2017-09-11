@@ -10,6 +10,7 @@ scripts/config.json
 appservice-registration-webhooks.yaml
 rooms.db
 users.db
+docker-compose.yaml
 
 # Logs
 logs

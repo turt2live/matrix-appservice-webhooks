@@ -1,6 +1,6 @@
 # matrix-appservice-webhooks
 
-[![TravisCI badge](https://travis-ci.org/turt2live/matrix-appservice-webhooks.svg?branch=master)](https://travis-ci.org/turt2live/matrix-appservice-webhooks) 
+[![TravisCI badge](https://travis-ci.org/turt2live/matrix-appservice-webhooks.svg?branch=master)](https://travis-ci.org/turt2live/matrix-appservice-webhooks)
 [![Targeted for next release](https://badge.waffle.io/turt2live/matrix-appservice-webhooks.png?label=sorted&title=Targeted+for+next+release)](https://waffle.io/turt2live/waffle-matrix?utm_source=badge)
 [![WIP](https://badge.waffle.io/turt2live/matrix-appservice-webhooks.png?label=wip&title=WIP)](https://waffle.io/turt2live/waffle-matrix?utm_source=badge)
 [![API Documentation](https://img.shields.io/badge/api%20documentation-Postman-blue.svg)](https://documenter.getpostman.com/view/1707443/matrix-webhooks/6fYShpU)
@@ -69,3 +69,53 @@ Invite the webhook bridge to your room (`@_webhook:t2bot.io`) and send the messa
 ```
 
 Format can be `plain` or `html`. Emoji will be converted automatically(`:heart:` becomes ❤); set the `emoji` property to `false` to disable this conversion.
+
+# Running with Docker
+
+There are two gotchas when running with Docker.
+
+First of all the appservice needs to communicate with synapse and there are two ways. Either create a docker network and set the urls accordingly or use public urls (ie webhooks.example.com or example.com:9000). Using `localhost:9000` as the url for appservice won't work because synapse has it's "own" localhost.
+
+Secondly, you need to generate the registration file and let synapse (or whatever server you're using) have access to it. The approach here is to generate it with a temporary container and a [bind mount](https://docs.docker.com/engine/admin/volumes/bind-mounts/) so the file is accessible on the host and can be copied to the homeserver.
+
+Below are a few example of how do achieve this. There is also a `docker-compose.example.yaml`.
+
+### Build the image
+```
+# Feel free to change the tag
+docker build -t matrix-webhooks-image .
+```
+
+### Generating registration file
+```
+# The host in the URL depends on what you later name the container
+docker run --rm -v "$(pwd)":/app matrix-webhooks-image -r -u "http://matrix_webhooks_container:9000" -c config/config.yaml
+cp appservice-registration-webhooks.yaml /path/to/synapse/
+```
+
+All the arguments after the image name (`matrix-webhooks-image`) will be passed to `node`, so you can use another config file if you wish.
+
+
+### Running the container with default arguments
+
+```
+# Port is 9000 and config is config/config.yaml as per the Dockerfile CMD
+docker run -p 4501:4501 -p 9000:9000 -d --name matrix_webhooks_container -v $(pwd):/app/ matrix-webhooks-image
+```
+
+### Running the container with custom arguments
+
+```
+# Using 127.0.0.1 means the port won't be exposed on the host, so you'd have to reverse proxy it
+docker run -p 127.0.0.1:4501:4501 -p 127.0.0.1:9001:9001 -d --name matrix_webhooks_container -v $(pwd):/app/ matrix-webhooks-image -p 9001 -c config/other_config.yaml
+```
+
+
+### Creating a network to connect the containers
+```
+docker network create matrix-network
+docker network connect [your_synapse_container]
+docker network connect matrix_webhooks_container
+```
+
+Now restart your containers and you should be good to go!
