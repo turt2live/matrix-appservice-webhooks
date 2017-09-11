@@ -96,7 +96,8 @@ docker build -t matrix-webhooks-image .
 ### Generating registration file
 ```
 # The host in the URL depends on what you later name the container
-docker run --rm -v "$(pwd)":/app matrix-webhooks-image -r -u "http://matrixwebhooks:9000" -c config/config.yaml
+docker run --rm -v "$(pwd)":/app matrix-webhooks-image \
+  -r -u "http://matrixwebhooks:9000" -c config/config.yaml
 cp appservice-registration-webhooks.yaml /path/to/synapse/
 ```
 
@@ -114,7 +115,8 @@ docker run -p 4501:4501 -d --name matrixwebhooks -v $(pwd):/app/ matrix-webhooks
 
 ```
 # Using 127.0.0.1 means the port won't be exposed outside the host, so you'd have to reverse proxy it
-docker run -p 127.0.0.1:4501:4501  -d --name matrixwebhooks -v $(pwd):/app/ matrix-webhooks-image -p 9001 -c config/other_config.yaml
+docker run -p 127.0.0.1:4501:4501  -d --name matrixwebhooks -v $(pwd):/app/ matrix-webhooks-image \
+  -p 9001 -c config/other_config.yaml
 ```
 
 ### Update config.yaml
