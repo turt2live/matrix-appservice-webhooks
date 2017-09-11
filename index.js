@@ -20,7 +20,7 @@ var cli = new Cli({
                 domain: "localhost"
             },
             webhookBot: {
-                localPart: "_webhook",
+                localpart: "_webhook",
                 appearance: {
                     displayName: "Webhook Bridge",
                     avatarUrl: "http://i.imgur.com/IDOBtEJ.png" // webhook bridge icon
@@ -54,7 +54,7 @@ var cli = new Cli({
 
         if (!registration.getSenderLocalpart()) {
             var config = cli.getConfig();
-            registration.setSenderLocalpart(config.webhookBot.localPart);
+            registration.setSenderLocalpart(config.webhookBot.localpart);
         }
 
         registration.addRegexPattern("users", "@_webhook.*", true);
@@ -80,5 +80,5 @@ var cli = new Cli({
                 throw err;
             });
     }
-})
+});
 cli.run();

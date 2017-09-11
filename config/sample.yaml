@@ -9,8 +9,10 @@ homeserver:
 
 # Configuration specific to the bridge. All fields (unless otherwise marked) are required.
 webhookBot:
+  # The localpart to use for the bot. May require re-registering the application service.
+  localpart: "_webhook"
+
   # Appearance options for the Matrix bot
-  localPart: "_webhook"
   appearance:
     displayName: "Webhook Bridge"
     avatarUrl: "http://i.imgur.com/IDOBtEJ.png" # webhook icon
