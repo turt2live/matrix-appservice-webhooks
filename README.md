@@ -80,6 +80,8 @@ Secondly, you need to generate the registration file and let synapse (or whateve
 
 Below are a few example of how do achieve this. There is also a `docker-compose.example.yaml`.
 
+**Note** I've had some trouble getting synapse to properly talk to the appservice on the docker network (the reverse works fine). If you experience something similar, expose `9000` on the host or reverse proxy it and use the public url instead of `http://matrix_webhooks_container:9000` in the examples.
+
 ### Build the image
 ```
 # Feel free to change the tag
@@ -110,6 +112,14 @@ docker run -p 4501:4501 -p 9000:9000 -d --name matrix_webhooks_container -v $(pw
 docker run -p 127.0.0.1:4501:4501 -p 127.0.0.1:9001:9001 -d --name matrix_webhooks_container -v $(pwd):/app/ matrix-webhooks-image -p 9001 -c config/other_config.yaml
 ```
 
+### Update config.yaml
+If you want to use the internal network you need to set the URL to synapse to the name of the container.
+
+```
+homeserver:
+  # The domain for the client-server API calls.
+  url: "http://synapse:8008"
+```
 
 ### Creating a network to connect the containers
 ```
