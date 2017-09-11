@@ -27,6 +27,8 @@ properties:
   webhookBot:
     type: "object"
     properties:
+      localPart:
+        type: "string"
       appearance:
         type: "object"
         properties:

@@ -6,7 +6,7 @@ var WebhookStore = require("./src/storage/WebhookStore");
 var WebhookBridge = require("./src/WebhookBridge");
 var WebService = require("./src/WebService");
 
-new Cli({
+var cli = new Cli({
     registrationPath: "appservice-registration-webhooks.yaml",
     enableRegistration: true,
     enableLocalpart: true,
@@ -20,6 +20,7 @@ new Cli({
                 domain: "localhost"
             },
             webhookBot: {
+                localPart: "_webhook",
                 appearance: {
                     displayName: "Webhook Bridge",
                     avatarUrl: "http://i.imgur.com/IDOBtEJ.png" // webhook bridge icon
@@ -52,7 +53,8 @@ new Cli({
         registration.setRateLimited(false); // disabled because webhooks can get spammy
 
         if (!registration.getSenderLocalpart()) {
-            registration.setSenderLocalpart("_webhook");
+            var config = cli.getConfig();
+            registration.setSenderLocalpart(config.webhookBot.localPart);
         }
 
         registration.addRegexPattern("users", "@_webhook.*", true);
@@ -78,4 +80,5 @@ new Cli({
                 throw err;
             });
     }
-}).run();
+})
+cli.run();
