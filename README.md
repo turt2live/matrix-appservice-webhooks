@@ -124,8 +124,8 @@ homeserver:
 ### Creating a network to connect the containers
 ```
 docker network create matrix-network
-docker network connect [your_synapse_container]
-docker network connect matrix_webhooks_container
+docker network connect matrix-network [your_synapse_container]
+docker network connect matrix-network matrix_webhooks_container
 ```
 
 Now restart your containers and you should be good to go!
