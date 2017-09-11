@@ -74,13 +74,18 @@ Format can be `plain` or `html`. Emoji will be converted automatically(`:heart:`
 
 There are two gotchas when running with Docker.
 
-First of all the appservice needs to communicate with synapse and there are two ways. Either create a docker network and set the urls accordingly or use public urls (ie webhooks.example.com or example.com:9000). Using `localhost:9000` as the url for appservice won't work because synapse has it's "own" localhost.
+First of all the appservice needs to communicate with synapse. To do this, create a docker network and set the urls accordingly. Using `localhost:9000` as the url for appservice won't work because synapse has it's "own" localhost. Make sure you [don't expose the appservice port](https://github.com/turt2live/matrix-appservice-webhooks/pull/24#discussion_r138083936) outside the host.
+
+If the sync homeserver -> appservice isn't working check your logs for something like this and change the name of the appservice container so that synapse accepts it, ie `webhooks`, `matrix-webhooks` or similar.
+
+```
+synapse.appservice.api - 228 - WARNING - - push_bulk to http://matrix_webhooks_1:9000/transactions/1 threw exception invalid hostname: matrix_webhooks_1
+```
 
 Secondly, you need to generate the registration file and let synapse (or whatever server you're using) have access to it. The approach here is to generate it with a temporary container and a [bind mount](https://docs.docker.com/engine/admin/volumes/bind-mounts/) so the file is accessible on the host and can be copied to the homeserver.
 
 Below are a few example of how do achieve this. There is also a `docker-compose.example.yaml`.
 
-**Note** I've had some trouble getting synapse to properly talk to the appservice on the docker network (the reverse works fine). If you experience something similar, expose `9000` on the host or reverse proxy it and use the public url instead of `http://matrix_webhooks_container:9000` in the examples.
 
 ### Build the image
 ```
@@ -91,7 +96,7 @@ docker build -t matrix-webhooks-image .
 ### Generating registration file
 ```
 # The host in the URL depends on what you later name the container
-docker run --rm -v "$(pwd)":/app matrix-webhooks-image -r -u "http://matrix_webhooks_container:9000" -c config/config.yaml
+docker run --rm -v "$(pwd)":/app matrix-webhooks-image -r -u "http://matrixwebhooks:9000" -c config/config.yaml
 cp appservice-registration-webhooks.yaml /path/to/synapse/
 ```
 
@@ -102,14 +107,14 @@ All the arguments after the image name (`matrix-webhooks-image`) will be passed 
 
 ```
 # Port is 9000 and config is config/config.yaml as per the Dockerfile CMD
-docker run -p 4501:4501 -p 9000:9000 -d --name matrix_webhooks_container -v $(pwd):/app/ matrix-webhooks-image
+docker run -p 4501:4501 -d --name matrixwebhooks -v $(pwd):/app/ matrix-webhooks-image
 ```
 
 ### Running the container with custom arguments
 
 ```
-# Using 127.0.0.1 means the port won't be exposed on the host, so you'd have to reverse proxy it
-docker run -p 127.0.0.1:4501:4501 -p 127.0.0.1:9001:9001 -d --name matrix_webhooks_container -v $(pwd):/app/ matrix-webhooks-image -p 9001 -c config/other_config.yaml
+# Using 127.0.0.1 means the port won't be exposed outside the host, so you'd have to reverse proxy it
+docker run -p 127.0.0.1:4501:4501  -d --name matrixwebhooks -v $(pwd):/app/ matrix-webhooks-image -p 9001 -c config/other_config.yaml
 ```
 
 ### Update config.yaml
@@ -125,7 +130,7 @@ homeserver:
 ```
 docker network create matrix-network
 docker network connect matrix-network [your_synapse_container]
-docker network connect matrix-network matrix_webhooks_container
+docker network connect matrix-network matrixwebhooks
 ```
 
 Now restart your containers and you should be good to go!
