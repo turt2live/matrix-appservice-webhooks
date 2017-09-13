@@ -17,9 +17,9 @@ module.exports = (webhook, matrix) => {
 
     html += `<blockquote style="border-color: ${color};">`
     if (attachment.title ) {
-      html += `<h3>`
+      html += `<h4>`
       html += (attachment.title_link)
-        ? `<a href="${attachment.title_link}">${attachment.title}</a></h3>`
+        ? `<a href="${attachment.title_link}">${attachment.title}</a></h4>`
         : `${attachment.title}</h3>`
     }
 
