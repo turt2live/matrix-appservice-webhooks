@@ -20,7 +20,7 @@ module.exports = (webhook, matrix) => {
       html += `<h4>`
       html += (attachment.title_link)
         ? `<a href="${attachment.title_link}">${attachment.title}</a></h4>`
-        : `${attachment.title}</h3>`
+        : `${attachment.title}</h4>`
     }
 
     if (attachment.text)
