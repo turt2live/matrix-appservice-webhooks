@@ -36,7 +36,7 @@ class WebService {
         }
 
         var hookInfo = request.body;
-        if (!hookInfo || !hookInfo["text"]) {
+        if (!hookInfo || (!hookInfo["text"] && hookInfo['attachments'].length == 0)) {
             LogService.error("WebService [Hook " + request.params.hookId + "]", "Invalid message: missing text");
             response.status(400).send({error: 'Missing message text', success: false});
             return;
