@@ -11,15 +11,15 @@ class SlackImgUploader {
         this._bridge = bridge;
     }
 
-    uploadImages(attm) {
+    uploadImages(attachment) {
         var promises = [];
         var attrs = ['author_icon', 'footer_icon', 'image_url']
         attrs.forEach(function (key) {
-            var imageUrl = attm[key]
-            if (attrs.includes(key) && imageUrl)
+            var imageUrl = attachment[key]
+            if (imageUrl)
                 var uploadPromise = Promise.resolve(imageUrl);
                 uploadPromise = util.uploadContentFromUrl(this._bridge, imageUrl, this._bridge.getBotIntent());
-                promises.push(uploadPromise.then(mxcUrl => { attm[key] = mxcUrl }));
+                promises.push(uploadPromise.then(mxcUrl => { attachment[key] = mxcUrl }));
         }, this)
         return Promise.all(promises);
     }
