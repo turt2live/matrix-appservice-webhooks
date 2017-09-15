@@ -1,7 +1,7 @@
 var util = require("../utils");
 var LogService = require("../LogService");
 
-class SlackImgUploader {
+class ImageUploader {
 
     /**
      * Uploads images from Slack attachments
@@ -14,7 +14,7 @@ class SlackImgUploader {
     uploadImages(attachment) {
         var promises = [];
         var attrs = ['author_icon', 'footer_icon', 'image_url']
-        attrs.forEach(function (key) {
+        attrs.forEach(key => {
             var imageUrl = attachment[key]
             if (imageUrl)
                 var uploadPromise = Promise.resolve(imageUrl);
@@ -25,4 +25,4 @@ class SlackImgUploader {
     }
 }
 
-module.exports = SlackImgUploader;
+module.exports = ImageUploader;

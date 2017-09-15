@@ -1,7 +1,7 @@
 var LogService = require("../LogService");
 var PubSub = require("pubsub-js");
 var Promise = require("bluebird");
-var SlackImgUploader = require("./SlackImgUploader")
+var ImageUploader = require("./ImageUploader")
 
 class WebhookReceiver {
     constructor() {
@@ -54,7 +54,7 @@ class WebhookReceiver {
         var layerChain = Promise.resolve();
 
         // Upload (optional) Slack attachments
-        var uploader = new SlackImgUploader(this._bridge)
+        var uploader = new ImageUploader(this._bridge)
         var attachments = webhookEvent.payload.attachments
         if (attachments && attachments.length > 0)
             attachments.map(attm => layerChain = layerChain.then(() => uploader.uploadImages(attm)));
