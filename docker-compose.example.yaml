@@ -1,0 +1,25 @@
+version: "2"
+services:
+  synapse:
+    image: silviof/docker-matrix
+    ports:
+     - "127.0.0.1:8008:8008"
+     - "8448:8448"
+     - "3478:3478"
+    volumes:
+     - /opt/matrix/data:/data
+
+  appservice_webhooks:
+    container_name: webhooks
+    build: .
+    volumes:
+      - ".:/app/"
+    expose:
+      - 9000
+    ports:
+      - "127.0.0.1:4501:4501"
+
+networks:
+  default:
+    external:
+      name: matrix-network
