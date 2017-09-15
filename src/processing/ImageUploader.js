@@ -16,10 +16,11 @@ class ImageUploader {
         var attrs = ['author_icon', 'footer_icon', 'image_url']
         attrs.forEach(key => {
             var imageUrl = attachment[key]
-            if (imageUrl)
+            if (imageUrl) {
                 var uploadPromise = Promise.resolve(imageUrl);
                 uploadPromise = util.uploadContentFromUrl(this._bridge, imageUrl, this._bridge.getBotIntent());
                 promises.push(uploadPromise.then(mxcUrl => { attachment[key] = mxcUrl }));
+            }
         }, this)
         return Promise.all(promises);
     }
