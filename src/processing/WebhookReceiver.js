@@ -23,6 +23,7 @@ class WebhookReceiver {
             require("./layers/message/emoji"),
             require("./layers/message/from_slack_attachments"),
             require("./layers/message/html"),
+            require("./layers/message/slack_fallback"),
         ];
 
         PubSub.subscribe("incoming_webhook", this._postMessage.bind(this));
