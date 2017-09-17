@@ -1,35 +1,43 @@
 var LogService = require("../LogService");
 var PubSub = require("pubsub-js");
 var Promise = require("bluebird");
-var ImageUploader = require("./ImageUploader")
 
 class WebhookReceiver {
     constructor() {
-        this._layers = [
-            // Avatar
-            require("./layers/avatar/from_webhook"),
-            require("./layers/avatar/slack_icon_url"),
-            require("./layers/avatar/slack_icon_emoji"),
-            require("./layers/avatar/default"),
-
-            // Display Name
-            require("./layers/displayName/from_webhook"),
-            require("./layers/displayName/slack"),
-            require("./layers/displayName/default"),
-            require("./layers/displayName/emoji"),
-
-            // Message
-            require("./layers/message/from_webhook"),
-            require("./layers/message/from_slack_attachments"),
-            require("./layers/message/emoji"),
-            require("./layers/message/html"),
-            require("./layers/message/slack_fallback"),
-
-            // Misc
-            require("./layers/message/msgtype"),
-        ];
-
         PubSub.subscribe("incoming_webhook", this._postMessage.bind(this));
+    }
+
+    _getLayers() {
+        if (!this._layers) {
+            this._layers = [
+                // Avatar
+                require("./layers/avatar/from_webhook"),
+                require("./layers/avatar/slack_icon_url"),
+                require("./layers/avatar/slack_icon_emoji"),
+                require("./layers/avatar/default"),
+
+                // Display Name
+                require("./layers/displayName/from_webhook"),
+                require("./layers/displayName/slack"),
+                require("./layers/displayName/default"),
+                require("./layers/displayName/emoji"),
+
+                // Message
+                require("./layers/message/from_webhook"),
+                require("./layers/message/from_slack_attachments"),
+                require("./layers/message/emoji"),
+                require("./layers/message/html"),
+                require("./layers/message/slack_fallback"),
+
+                // Misc
+                require("./layers/message/msgtype"),
+
+                // Post-processing
+                require("./layers/postprocess/upload_images"),
+            ];
+        }
+
+        return this._layers;
     }
 
     /**
@@ -56,14 +64,7 @@ class WebhookReceiver {
 
         // Apply filtering on the content
         var layerChain = Promise.resolve();
-
-        // Upload (optional) Slack attachments
-        var uploader = new ImageUploader(this._bridge);
-        var attachments = webhookEvent.payload.attachments;
-        if (attachments && attachments.length > 0)
-            attachments.map(attm => layerChain = layerChain.then(() => uploader.uploadImages(attm)));
-
-        this._layers.map(a => layerChain = layerChain.then(() => a(webhookEvent.payload, matrixPayload)));
+        this._getLayers().forEach(a => layerChain = layerChain.then(() => a(webhookEvent.payload, matrixPayload)));
 
         layerChain.then(() => {
             var localpart = (webhookEvent.hook.roomId + "_" + matrixPayload.sender.displayName).replace(/[^a-zA-Z0-9]/g, '_');
