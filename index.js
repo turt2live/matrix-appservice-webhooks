@@ -67,8 +67,8 @@ var cli = new Cli({
         WebhookStore.prepare()
             .then(() => {
                 LogService.info("index", "Preparing bridge...");
-                var bridge = new WebhookBridge(config, registration);
-                return bridge.run(port);
+                WebhookBridge.init(config, registration);
+                return WebhookBridge.run(port);
             })
             .then(() => {
                 if (config.provisioning.secret !== "CHANGE_ME") WebService.setSharedToken(config.provisioning.secret);

@@ -11,12 +11,15 @@ var InteractiveProvisioner = require("./provisioning/InteractiveProvisioner");
 var WebhookReceiver = require("./processing/WebhookReceiver");
 
 class WebhookBridge {
-    constructor(config, registration) {
+    constructor() {
+        this._adminRooms = {}; // { roomId: AdminRoom }
+    }
+
+    init(config, registration) {
         LogService.info("WebhookBridge", "Constructing bridge");
 
         this._config = config;
         this._registration = registration;
-        this._adminRooms = {}; // { roomId: AdminRoom }
 
         this._bridge = new Bridge({
             registration: this._registration,
@@ -268,4 +271,4 @@ class WebhookBridge {
     }
 }
 
-module.exports = WebhookBridge;
+module.exports = new WebhookBridge();
