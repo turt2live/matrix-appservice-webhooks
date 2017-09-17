@@ -1,8 +1,11 @@
 module.exports = (webhook, matrix) => {
     if (!webhook.attachments) return;
     var text = "";
-    text = webhook.attachments.map(a => { return a.fallback });
-    // Fallback is required but let's remove additional newlines just in case
-    text = text.join("\n").trim().replace(/\n{2,}/g, "\n");
-    matrix.event.body = text;
+
+    for (var attachment of webhook.attachments) {
+        if (!attachment.fallback) return; // Technically required, but we shouldn't break on not having it
+        text += attachment.fallback + "\n";
+    }
+
+    matrix.event.body = text.trim();
 };

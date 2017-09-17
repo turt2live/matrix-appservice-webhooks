@@ -20,11 +20,13 @@ class WebhookReceiver {
 
             // Message
             require("./layers/message/from_webhook"),
-            require("./layers/message/msgtype"),
-            require("./layers/message/emoji"),
             require("./layers/message/from_slack_attachments"),
+            require("./layers/message/emoji"),
             require("./layers/message/html"),
             require("./layers/message/slack_fallback"),
+
+            // Misc
+            require("./layers/message/msgtype"),
         ];
 
         PubSub.subscribe("incoming_webhook", this._postMessage.bind(this));
@@ -56,8 +58,8 @@ class WebhookReceiver {
         var layerChain = Promise.resolve();
 
         // Upload (optional) Slack attachments
-        var uploader = new ImageUploader(this._bridge)
-        var attachments = webhookEvent.payload.attachments
+        var uploader = new ImageUploader(this._bridge);
+        var attachments = webhookEvent.payload.attachments;
         if (attachments && attachments.length > 0)
             attachments.map(attm => layerChain = layerChain.then(() => uploader.uploadImages(attm)));
 

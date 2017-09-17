@@ -1,52 +1,73 @@
+const COLOR_MAP = {
+    danger: "#d9534f",
+    warning: "#f0ad4e",
+    good: "#5cb85c",
+};
+
 module.exports = (webhook, matrix) => {
     if (!webhook.attachments) return;
-    var html = "";
-    webhook.format = "html";
-    webhook.attachments.forEach(attachment => {
-        var color = attachment.color || "#f7f7f7";
-        //bar = `<font color='${color}'>▌</font>`
-        html += (attachment.pretext) ? attachment.pretext+"<br/>" : "";
 
+    var combinedHtml = "";
+    for (var attachment of webhook.attachments) {
+        var color = "#f7f7f7";
+        if (attachment.color) color = attachment.color;
+        if (COLOR_MAP[attachment.color]) color = COLOR_MAP[attachment.color];
+
+        // Pretext
+        if (attachment.pretext) {
+            combinedHtml += attachment.pretext + "<br/>";
+        }
+
+        // Start the attachment block
+        combinedHtml += "<blockquote data-mx-border-color='" + color + "'>";
+
+        // Process the author
         if (attachment.author_name) {
-            html += `<small>`
-            html += (attachment.author_icon) ? `<img src="${attachment.author_icon}" height="16" width="16"/> ` : ""
-            html += (attachment.author_link) ? `<a href="${attachment.author_link}">${attachment.author_name}</a>` : attachment.author_name
-            html += "</small><br/>"
+            combinedHtml += "<small>";
+            if (attachment.author_icon) combinedHtml += "<img src='" + attachment.author_icon + "' height='16' width='16' />";
+            if (attachment.author_link) combinedHtml += "<a href='" + attachment.author_link + "'>" + attachment.author_name + "</a>";
+            else combinedHtml += attachment.author_name;
+            combinedHtml += "</small><br/>";
         }
 
-        html += `<blockquote style="border-color: ${color};">`;
+        // Title
         if (attachment.title) {
-          html += `<h4>`
-          html += (attachment.title_link)
-            ? `<a href="${attachment.title_link}">${attachment.title}</a></h4>`
-            : `${attachment.title}</h4>`;
+            combinedHtml += "<h4>";
+            if (attachment.title_link) {
+                combinedHtml += "<a href='" + attachment.title_link + ">" + attachment.title + "</a>";
+            } else combinedHtml += attachment.title;
+            combinedHtml += "</h4>";
         }
 
-        if (attachment.text)
-            html += `${attachment.text}<br/>`;
-
-        if (attachment.fields && attachment.fields.length > 0) {
-            attachment.fields.forEach(field => {
-                html += `<b>${field.title}</b><br/>${field.value}<br/>`;
-            })
+        // Text
+        if (attachment.text) {
+            combinedHtml += attachment.text + "<br/>";
         }
 
+        // Fields
+        if (attachment.fields) {
+            for (var field of attachment.fields) {
+                combinedHtml += "<b>" + field.title + "</b><br/>" + field.value + "<br/>";
+            }
+        }
+
+        // Image
+        if (attachment.image) {
+            combinedHtml += "<img src='" + attachment.image + "'><br/>";
+        }
+        // TODO: Support thumb_url
+
+        // Footer
         if (attachment.footer) {
-            html += `<small>`;
-            html += (attachment.footer_icon) ? `<img src="${attachment.footer_icon}" height="16" width="16"/> ` : "";
-            html += attachment.footer;
-            html += "</small><br/>";
+            combinedHtml += "<small>";
+            if (attachment.footer_icon) combinedHtml += "<img src='" + attachment.footer_icon + "' height='16' width='16'>";
+            combinedHtml += attachment.footer + "</small><br/>";
         }
 
-        if (attachment.image_url)
-          html += `<img src="${attachment.image_url}"/><br/>`;
-
-        html += "</blockquote>";
-    })
-    if (!matrix.event.body) {
-        matrix.event.body = html;
-    } else {
-        matrix.event.body += html;
+        combinedHtml += "</blockquote>";
     }
 
+    webhook.format = "html"; // to force the HTML layer to process it
+    if (matrix.event.body) combinedHtml = matrix.event.body + combinedHtml;
+    matrix.event.body = combinedHtml;
 };
