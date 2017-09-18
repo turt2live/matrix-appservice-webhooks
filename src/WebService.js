@@ -5,6 +5,7 @@ var PubSub = require('pubsub-js');
 var WebhookStore = require("./storage/WebhookStore");
 var ProvisioningService = require("./provisioning/ProvisioningService");
 var _ = require("lodash");
+var interceptor = require("express-interceptor");
 
 // TODO: Migrate provisioning API out of this class
 
@@ -20,6 +21,24 @@ class WebService {
             next();
         });
 
+        // Make sure everything we return is JSON
+        this._installInterceptor();
+        this._app.use((err, req, res, next) => {
+            LogService.error("WebService", err);
+
+            var status = 500;
+            var message = "Internal Server Error";
+            if (err.message.startsWith("Unexpected token ") && err.message.includes("in JSON at position")) {
+                message = err.message;
+                status = 400;
+            }
+
+            res.status(status);
+            res.set('Content-Type', "application/json");
+            res.send(JSON.stringify(this._constructError(res, message)));
+            next('Error encountered during hook processing');
+        });
+
         this._app.post("/api/v1/matrix/hook/:hookId", this._postWebhook.bind(this));
 
         // Provisioning API
@@ -28,11 +47,39 @@ class WebService {
         this._app.delete("/api/v1/provision/:roomId/hook/:hookId", this._deleteHook.bind(this));
     }
 
+    _installInterceptor() {
+        var finalParagraphInterceptor = interceptor((req, res) => {
+            return {
+                isInterceptable: () => {
+                    console.log(res.get('Content-Type'));
+                    return res.get('Content-Type').startsWith("text/plain") || res.get('Content-Type').startsWith("text/html");
+                },
+                intercept: (body, send) => {
+                    res.set('Content-Type', "application/json");
+                    send(JSON.stringify(this._constructError(res, body)));
+                }
+            };
+        });
+        this._app.use(finalParagraphInterceptor);
+    }
+
+    _constructError(res, body) {
+        var contentType = res.get('Content-Type');
+        var statusCode = res.statusCode;
+
+        return {
+            statusCode: statusCode,
+            success: !(statusCode < 200 || statusCode >= 300),
+            error: body,
+            originalMime: contentType
+        };
+    }
+
     _postWebhook(request, response) {
         response.setHeader("Content-Type", "application/json");
 
         if (request.headers['content-type'].toLowerCase() === 'application/x-www-form-urlencoded') {
-           request.body = JSON.parse(request.body.payload || "{}");
+            request.body = JSON.parse(request.body.payload || "{}");
         }
 
         var hookInfo = request.body;
