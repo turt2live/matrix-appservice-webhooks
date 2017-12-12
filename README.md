@@ -1,8 +1,6 @@
 # matrix-appservice-webhooks
 
 [![TravisCI badge](https://travis-ci.org/turt2live/matrix-appservice-webhooks.svg?branch=master)](https://travis-ci.org/turt2live/matrix-appservice-webhooks)
-[![Targeted for next release](https://badge.waffle.io/turt2live/matrix-appservice-webhooks.png?label=sorted&title=Targeted+for+next+release)](https://waffle.io/turt2live/waffle-matrix?utm_source=badge)
-[![WIP](https://badge.waffle.io/turt2live/matrix-appservice-webhooks.png?label=wip&title=WIP)](https://waffle.io/turt2live/waffle-matrix?utm_source=badge)
 [![API Documentation](https://img.shields.io/badge/api%20documentation-Postman-blue.svg)](https://documenter.getpostman.com/view/1707443/matrix-webhooks/6fYShpU)
 
 [![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/803b1c8e7f6fad521390)
