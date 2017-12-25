@@ -250,7 +250,11 @@ class WebhookBridge {
 
         if (event.type === "m.room.member" && event.content.membership === "invite" && event.state_key === this.getBot().getUserId()) {
             LogService.info("WebhookBridge", event.state_key + " received invite to room " + event.room_id);
-            return this._bridge.getIntent(event.state_key).join(event.room_id).then(() => this._processRoom(event.room_id));
+            var tryJoin = () => this._bridge.getIntent(event.state_key).join(event.room_id).then(() => this._processRoom(event.room_id));
+            return tryJoin().catch(err => {
+                console.error(err);
+                setTimeout(() => tryJoin(), 15000); // try to join the room again later
+            });
         } else if (event.type === "m.room.message" && event.sender !== this.getBot().getUserId()) {
             return this._processMessage(event);
         }
