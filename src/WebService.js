@@ -51,7 +51,6 @@ class WebService {
         var finalParagraphInterceptor = interceptor((req, res) => {
             return {
                 isInterceptable: () => {
-                    console.log(res.get('Content-Type'));
                     return res.get('Content-Type').startsWith("text/plain") || res.get('Content-Type').startsWith("text/html");
                 },
                 intercept: (body, send) => {
@@ -78,8 +77,11 @@ class WebService {
     _postWebhook(request, response) {
         response.setHeader("Content-Type", "application/json");
 
-        if (request.headers['content-type'].toLowerCase() === 'application/x-www-form-urlencoded') {
+        var contentType = request.headers['content-type'];
+        if (contentType && contentType.toLowerCase() === 'application/x-www-form-urlencoded') {
             request.body = JSON.parse(request.body.payload || "{}");
+        } else if (typeof(request.body) === "string") {
+            request.body = JSON.parse(request.body);
         }
 
         var hookInfo = request.body;
