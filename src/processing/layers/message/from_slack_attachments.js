@@ -34,7 +34,7 @@ module.exports = (webhook, matrix) => {
         if (attachment.title) {
             combinedHtml += "<h4>";
             if (attachment.title_link) {
-                combinedHtml += "<a href='" + attachment.title_link + ">" + attachment.title + "</a>";
+                combinedHtml += "<a href='" + attachment.title_link + "'>" + attachment.title + "</a>";
             } else combinedHtml += attachment.title;
             combinedHtml += "</h4>";
         }
