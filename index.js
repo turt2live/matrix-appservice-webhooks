@@ -64,16 +64,19 @@ var cli = new Cli({
     run: function (port, config, registration) {
         LogService.init(config);
         LogService.info("index", "Preparing database...");
+        var bridge = null;
         WebhookStore.prepare()
             .then(() => {
                 LogService.info("index", "Preparing bridge...");
-                WebhookBridge.init(config, registration);
+                bridge = WebhookBridge.init(config, registration);
                 return WebhookBridge.run(port);
             })
             .then(() => {
                 if (config.provisioning.secret !== "CHANGE_ME") WebService.setSharedToken(config.provisioning.secret);
                 else LogService.warn("index", "No provisioning API token is set - the provisioning API will not work for this bridge");
-                return WebService.start(config.web.bind, config.web.port, config.web.hookUrlBase)
+
+                WebService.setApp(bridge.appService.app);
+                return WebService.start(config.web.hookUrlBase);
             })
             .catch(err => {
                 LogService.error("Init", "Failed to start bridge");

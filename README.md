@@ -7,14 +7,9 @@
 
 Slack-compatible webhooks for Matrix. Talk about it on Matrix: [#webhooks:t2bot.io](https://matrix.to/#/#webhooks:t2bot.io)
 
-# Requirements
-
-* [NodeJS](https://nodejs.org/en/) (Node 6 or higher recommended)
-* A [Synapse](https://github.com/matrix-org/synapse) server
-
 # Installation
 
-**Before you begin:** A Synapse server is required. The instructions here assume that Synapse server is a default setup.
+**Before you begin:** A matrix homeserver and Node 9 or higher are required.
 
 1. Clone this repository and install the dependencies
    ```
@@ -47,7 +42,7 @@ Slack-compatible webhooks for Matrix. Talk about it on Matrix: [#webhooks:t2bot.
 
 # Running
 
-Using the port specified during the install (`9000` by default), use `node index.js -p 9000 -c config/config.yaml` from the repository directory.
+Using the port specified during the install (`9000` by default), use `node index.js -p 9000 -c config/config.yaml -f appservice-registration-webhooks.yaml` from the repository directory.
 
 The bridge should start working shortly afterwards.
 

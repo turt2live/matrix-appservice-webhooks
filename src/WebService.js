@@ -1,4 +1,3 @@
-var express = require("express");
 var bodyParser = require("body-parser");
 var LogService = require("./LogService");
 var PubSub = require('pubsub-js');
@@ -11,7 +10,10 @@ var interceptor = require("express-interceptor");
 
 class WebService {
     constructor() {
-        this._app = express();
+    }
+
+    setApp(app) {
+        this._app = app;
         this._app.use(bodyParser.json());
         this._app.use(bodyParser.urlencoded());
 
@@ -190,10 +192,8 @@ class WebService {
         this._token = token;
     }
 
-    start(bindAddress, port, baseAddress) {
+    start(baseAddress) {
         this._baseAddress = baseAddress;
-        this._app.listen(port, bindAddress);
-        LogService.info("WebService", "API now listening on " + bindAddress + ":" + port);
     }
 
     getHookUrl(hookId) {

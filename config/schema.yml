@@ -18,10 +18,6 @@ properties:
   web:
     type: "object"
     properties:
-      bind:
-        type: "string"
-      port:
-        type: "integer"
       hookUrlBase:
         type: "string"
   webhookBot:

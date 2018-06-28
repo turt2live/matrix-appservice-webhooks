@@ -50,6 +50,8 @@ class WebhookBridge {
                 }
             }
         });
+
+        return this._bridge;
     }
 
     run(port) {
