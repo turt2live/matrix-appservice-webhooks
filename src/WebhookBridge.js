@@ -25,6 +25,8 @@ class WebhookBridge {
             registration: this._registration,
             homeserverUrl: this._config.homeserver.url,
             domain: this._config.homeserver.domain,
+            userStore: process.env["WEBHOOKS_USER_STORE_PATH"] || "user-store.db",
+            roomStore: process.env["WEBHOOKS_ROOM_STORE_PATH"] || "room-store.db",
             controller: {
                 onEvent: this._onEvent.bind(this),
                 // none of these are used because the bridge doesn't allow users to create rooms or users

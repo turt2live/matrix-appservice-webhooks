@@ -25,7 +25,7 @@ class WebhookStore {
         LogService.info("WebhookStore", "Running migrations");
         return new Promise((resolve, reject)=> {
             var dbMigrate = DBMigrate.getInstance(true, {
-                config: "./config/database.json",
+                config: process.env["WEBHOOKS_DB_CONFIG_PATH"] || "./config/database.json",
                 env: env
             });
             dbMigrate.internals.argv.count = undefined; // HACK: Fix db-migrate from using `config/config.yaml` as the count. See https://github.com/turt2live/matrix-appservice-instagram/issues/11

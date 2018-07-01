@@ -7,6 +7,25 @@
 
 Slack-compatible webhooks for Matrix. Talk about it on Matrix: [#webhooks:t2bot.io](https://matrix.to/#/#webhooks:t2bot.io)
 
+# Usage
+
+Invite the webhook bridge to your room (`@_webhook:t2bot.io`) and send the message `!webhook`. The bridge bot will then send you a link to send messages to in a private message. You must be able to configure the room in order to set up webhooks.
+
+# JSON Body (for posting messages)
+
+```
+{
+  "text": "Hello world!",
+  "format": "plain",
+  "displayName": "My Cool Webhook",
+  "avatarUrl": "http://i.imgur.com/IDOBtEJ.png"
+}
+```
+
+Format can be `plain` or `html`. Emoji will be converted automatically(`:heart:` becomes ❤); set the `emoji` property to `false` to disable this conversion.
+To send a notice or emote, add `"msgtype" : "notice"` or `"msgtype" : "emote"` in your request.
+
+
 # Installation
 
 **Before you begin:** A matrix homeserver and Node 9 or higher are required.
@@ -46,20 +65,11 @@ Using the port specified during the install (`9000` by default), use `node index
 
 The bridge should start working shortly afterwards.
 
-# Usage
+### Docker
 
-Invite the webhook bridge to your room (`@_webhook:t2bot.io`) and send the message `!webhook`. The bridge bot will then send you a link to send messages to in a private message. You must be able to configure the room in order to set up webhooks.
-
-# JSON Body (for posting messages)
-
+A Docker image of the bridge is available to host the bridge yourself. The image can be built yourself with `docker build -t matrix-appservice-webhooks .` or you can use the image on docker.io:
 ```
-{
-  "text": "Hello world!",
-  "format": "plain",
-  "displayName": "My Cool Webhook",
-  "avatarUrl": "http://i.imgur.com/IDOBtEJ.png"
-}
+docker run -p 9000:9000 -v /path/to/webhooks/dir:/data turt2live/matrix-appservice-webhooks
 ```
 
-Format can be `plain` or `html`. Emoji will be converted automatically(`:heart:` becomes ❤); set the `emoji` property to `false` to disable this conversion.
-To send a notice or emote, add `"msgtype" : "notice"` or `"msgtype" : "emote"` in your request.
+The `/path/to/webhooks/dir` should have an `appservice-webhooks-registration.yaml` file, `config.yaml`, and `database.json`. Additional bridge-related data will be stored here.
