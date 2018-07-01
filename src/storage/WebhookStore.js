@@ -1,9 +1,9 @@
-var DBMigrate = require("db-migrate");
-var LogService = require("matrix-js-snippets").LogService;
-var Sequelize = require('sequelize');
-var dbConfig = require("../../config/database.json");
-var _ = require("lodash");
-var randomString = require('random-string');
+const DBMigrate = require("db-migrate");
+const LogService = require("matrix-js-snippets").LogService;
+const Sequelize = require('sequelize');
+const dbConfig = require("../../config/database.json");
+const _ = require("lodash");
+const randomString = require('random-string');
 
 /**
  * Primary storage for the Webhook Bridge
@@ -21,19 +21,19 @@ class WebhookStore {
      * Prepares the store for use
      */
     prepare() {
-        var env = process.env.NODE_ENV || "development";
+        const env = process.env.NODE_ENV || "development";
         LogService.info("WebhookStore", "Running migrations");
         return new Promise((resolve, reject)=> {
-            var dbMigrate = DBMigrate.getInstance(true, {
+            const dbMigrate = DBMigrate.getInstance(true, {
                 config: process.env["WEBHOOKS_DB_CONFIG_PATH"] || "./config/database.json",
                 env: env
             });
             dbMigrate.internals.argv.count = undefined; // HACK: Fix db-migrate from using `config/config.yaml` as the count. See https://github.com/turt2live/matrix-appservice-instagram/issues/11
             dbMigrate.up().then(() => {
-                var dbConfigEnv = dbConfig[env];
+                let dbConfigEnv = dbConfig[env];
                 if (!dbConfigEnv) throw new Error("Could not find DB config for " + env);
 
-                var opts = {
+                const opts = {
                     host: dbConfigEnv.host || 'localhost',
                     dialect: 'sqlite',
                     storage: dbConfigEnv.filename,
@@ -75,8 +75,8 @@ class WebhookStore {
      */
     getAccountData(objectId) {
         return this.__AccountData.findAll({where: {objectId: objectId}}).then(rows => {
-            var container = {};
-            for (var row of rows) {
+            const container = {};
+            for (let row of rows) {
                 container[row.key] = row.value;
             }
             return container;
@@ -91,10 +91,10 @@ class WebhookStore {
      */
     setAccountData(objectId, data) {
         return this.__AccountData.destroy({where: {objectId: objectId}, truncate: true}).then(() => {
-            var promises = [];
+            const promises = [];
 
-            var keys = _.keys(data);
-            for (var key of keys) {
+            const keys = _.keys(data);
+            for (let key of keys) {
                 promises.push(this.__AccountData.create({objectId: objectId, key: key, value: data[key]}));
             }
 

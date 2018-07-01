@@ -1,4 +1,4 @@
-var emoji = require('node-emoji');
+const emoji = require('node-emoji');
 
 module.exports = (webhook, matrix) => {
     if (webhook.emoji !== false && matrix.sender.displayName) {

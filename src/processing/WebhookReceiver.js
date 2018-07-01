@@ -1,6 +1,6 @@
-var LogService = require("matrix-js-snippets").LogService;
-var PubSub = require("pubsub-js");
-var Promise = require("bluebird");
+const LogService = require("matrix-js-snippets").LogService;
+const PubSub = require("pubsub-js");
+const Promise = require("bluebird");
 
 class WebhookReceiver {
     constructor() {
@@ -52,7 +52,7 @@ class WebhookReceiver {
 
     _postMessage(event, webhookEvent) {
         // Note: The payload is intentionally blank. This is for IDE autocomplete. The values will be populated by the layers.
-        var matrixPayload = {
+        const matrixPayload = {
             event: {
                 body: null,
                 msgtype: "m.text",
@@ -64,15 +64,15 @@ class WebhookReceiver {
         };
 
         // Apply filtering on the content
-        var layerChain = Promise.resolve();
+        let layerChain = Promise.resolve();
         this._getLayers().forEach(a => layerChain = layerChain.then(() => a(webhookEvent.payload, matrixPayload)));
 
         layerChain.then(() => {
-            var localpart = (webhookEvent.hook.roomId + "_" + matrixPayload.sender.displayName).replace(/[^a-zA-Z0-9]/g, '_');
-            var intent = this._bridge.getWebhookUserIntent(localpart);
+            const localpart = (webhookEvent.hook.roomId + "_" + matrixPayload.sender.displayName).replace(/[^a-zA-Z0-9]/g, '_');
+            const intent = this._bridge.getWebhookUserIntent(localpart);
 
             // Update profile, try join, fall back to invite, and try to send message
-            var postFn = () => intent.sendMessage(webhookEvent.hook.roomId, matrixPayload.event);
+            const postFn = () => intent.sendMessage(webhookEvent.hook.roomId, matrixPayload.event);
             this._bridge.updateHookProfile(intent, matrixPayload.sender.displayName, matrixPayload.sender.avatarUrl)
                 .then(() => {
                     return intent.join(webhookEvent.hook.roomId).then(postFn, err => {

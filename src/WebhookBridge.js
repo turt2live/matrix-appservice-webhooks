@@ -1,14 +1,14 @@
-var Bridge = require("matrix-appservice-bridge").Bridge;
-var LogService = require("matrix-js-snippets").LogService;
-var AdminRoom = require("./matrix/AdminRoom");
-var util = require("./utils");
-var WebhookStore = require("./storage/WebhookStore");
-var Promise = require('bluebird');
-var _ = require('lodash');
-var WebService = require("./WebService");
-var ProvisioningService = require("./provisioning/ProvisioningService");
-var InteractiveProvisioner = require("./provisioning/InteractiveProvisioner");
-var WebhookReceiver = require("./processing/WebhookReceiver");
+const Bridge = require("matrix-appservice-bridge").Bridge;
+const LogService = require("matrix-js-snippets").LogService;
+const AdminRoom = require("./matrix/AdminRoom");
+const util = require("./utils");
+const WebhookStore = require("./storage/WebhookStore");
+const Promise = require('bluebird');
+const _ = require('lodash');
+const WebService = require("./WebService");
+const ProvisioningService = require("./provisioning/ProvisioningService");
+const InteractiveProvisioner = require("./provisioning/InteractiveProvisioner");
+const WebhookReceiver = require("./processing/WebhookReceiver");
 
 class WebhookBridge {
     constructor() {
@@ -34,7 +34,7 @@ class WebhookBridge {
                 // onAliasQuery: this._onAliasQuery.bind(this),
                 // onAliasQueried: this._onAliasQueried.bind(this),
                 onLog: (line, isError) => {
-                    var method = isError ? LogService.error : LogService.verbose;
+                    const method = isError ? LogService.error : LogService.verbose;
                     method("matrix-appservice-bridge", line);
                 }
             },
@@ -94,8 +94,8 @@ class WebhookBridge {
     }
 
     getOrCreateAdminRoom(userId) {
-        var roomIds = _.keys(this._adminRooms);
-        for (var roomId of roomIds) {
+        const roomIds = _.keys(this._adminRooms);
+        for (let roomId of roomIds) {
             if (!this._adminRooms[roomId]) continue;
             if (this._adminRooms[roomId].owner === userId)
                 return Promise.resolve(this._adminRooms[roomId]);
@@ -111,9 +111,9 @@ class WebhookBridge {
                 initial_state: [{content: {guest_access: "can_join"}, type: "m.room.guest_access", state_key: ""}]
             }
         }).then(room => {
-            var newRoomId = room.room_id;
+            const newRoomId = room.room_id;
             return this._processRoom(newRoomId, /*adminRoomOwner=*/userId).then(() => {
-                var room = this._adminRooms[newRoomId];
+                let room = this._adminRooms[newRoomId];
                 if (!room) throw new Error("Could not create admin room for " + userId);
                 return room;
             });
@@ -127,13 +127,13 @@ class WebhookBridge {
     _updateBotProfile() {
         LogService.info("WebhookBridge", "Updating appearance of bridge bot");
 
-        var desiredDisplayName = this._config.webhookBot.appearance.displayName || "Webhook Bridge";
-        var desiredAvatarUrl = this._config.webhookBot.appearance.avatarUrl || "http://i.imgur.com/IDOBtEJ.png"; // webhook icon
+        const desiredDisplayName = this._config.webhookBot.appearance.displayName || "Webhook Bridge";
+        const desiredAvatarUrl = this._config.webhookBot.appearance.avatarUrl || "http://i.imgur.com/IDOBtEJ.png"; // webhook icon
 
-        var botIntent = this.getBotIntent();
+        const botIntent = this.getBotIntent();
 
         WebhookStore.getAccountData('bridge').then(botProfile => {
-            var avatarUrl = botProfile.avatarUrl;
+            let avatarUrl = botProfile.avatarUrl;
             if (!avatarUrl || avatarUrl !== desiredAvatarUrl) {
                 util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, botIntent).then(mxcUrl => {
                     LogService.verbose("WebhookBridge", "Avatar MXC URL = " + mxcUrl);
@@ -159,11 +159,11 @@ class WebhookBridge {
         LogService.info("WebhookBridge", "Updating appearance of " + intent.getClient().credentials.userId);
 
         return WebhookStore.getAccountData(intent.getClient().credentials.userId).then(botProfile => {
-            var promises = [];
+            const promises = [];
 
-            var avatarUrl = botProfile.avatarUrl;
+            let avatarUrl = botProfile.avatarUrl;
             if ((!avatarUrl || avatarUrl !== desiredAvatarUrl) && desiredAvatarUrl) {
-                var uploadPromise = Promise.resolve(desiredAvatarUrl);
+                let uploadPromise = Promise.resolve(desiredAvatarUrl);
                 if (!desiredAvatarUrl.startsWith("mxc://"))
                     uploadPromise = util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, this.getBotIntent());
 
@@ -194,7 +194,7 @@ class WebhookBridge {
      */
     _bridgeKnownRooms() {
         this._bridge.getBot().getJoinedRooms().then(rooms => {
-            for (var roomId of rooms) {
+            for (let roomId of rooms) {
                 this._processRoom(roomId);
             }
         });
@@ -211,11 +211,11 @@ class WebhookBridge {
     _processRoom(roomId, adminRoomOwner = null) {
         LogService.info("WebhookBridge", "Request to bridge room " + roomId);
         return this._bridge.getBot().getJoinedMembers(roomId).then(members => {
-            var roomMemberIds = _.keys(members);
-            var botIdx = roomMemberIds.indexOf(this._bridge.getBot().getUserId());
+            const roomMemberIds = _.keys(members);
+            const botIdx = roomMemberIds.indexOf(this._bridge.getBot().getUserId());
 
             if (roomMemberIds.length == 2 || adminRoomOwner) {
-                var otherUserId = roomMemberIds[botIdx == 0 ? 1 : 0];
+                const otherUserId = roomMemberIds[botIdx == 0 ? 1 : 0];
                 this._adminRooms[roomId] = new AdminRoom(roomId, this, otherUserId || adminRoomOwner);
                 LogService.verbose("WebhookBridge", "Added admin room for user " + (otherUserId || adminRoomOwner));
             } // else it is just a regular room
@@ -229,7 +229,7 @@ class WebhookBridge {
      * @private
      */
     _tryProcessAdminEvent(event) {
-        var roomId = event.room_id;
+        const roomId = event.room_id;
 
         if (this._adminRooms[roomId]) this._adminRooms[roomId].handleEvent(event);
     }
@@ -248,13 +248,13 @@ class WebhookBridge {
      * @private
      */
     _onEvent(request, context) {
-        var event = request.getData();
+        const event = request.getData();
 
         this._tryProcessAdminEvent(event);
 
         if (event.type === "m.room.member" && event.content.membership === "invite" && event.state_key === this.getBot().getUserId()) {
             LogService.info("WebhookBridge", event.state_key + " received invite to room " + event.room_id);
-            var tryJoin = () => this._bridge.getIntent(event.state_key).join(event.room_id).then(() => this._processRoom(event.room_id));
+            const tryJoin = () => this._bridge.getIntent(event.state_key).join(event.room_id).then(() => this._processRoom(event.room_id));
             return tryJoin().catch(err => {
                 console.error(err);
                 setTimeout(() => tryJoin(), 15000); // try to join the room again later
@@ -268,11 +268,11 @@ class WebhookBridge {
     }
 
     _processMessage(event) {
-        var message = event.content.body;
+        let message = event.content.body;
         if (!message || !message.startsWith("!webhook")) return;
 
-        var parts = message.split(" ");
-        var room = event.room_id;
+        const parts = message.split(" ");
+        let room = event.room_id;
         if (parts[1]) room = parts[1];
 
         InteractiveProvisioner.createWebhook(event.sender, room, event.room_id);

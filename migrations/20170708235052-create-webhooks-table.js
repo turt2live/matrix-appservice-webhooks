@@ -1,8 +1,8 @@
 'use strict';
 
-var dbm;
-var type;
-var seed;
+let dbm;
+let type;
+let seed;
 
 /**
  * We receive the dbmigrate dependency from dbmigrate initially.

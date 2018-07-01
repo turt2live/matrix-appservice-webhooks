@@ -1,6 +1,6 @@
-var WebhookStore = require("../storage/WebhookStore");
-var Promise = require("bluebird");
-var LogService = require("matrix-js-snippets").LogService;
+const WebhookStore = require("../storage/WebhookStore");
+const Promise = require("bluebird");
+const LogService = require("matrix-js-snippets").LogService;
 
 class ProvisioningService {
 
@@ -72,19 +72,19 @@ class ProvisioningService {
                 return Promise.reject();
             }
 
-            var userPowerLevels = powerLevels['users'] || {};
+            const userPowerLevels = powerLevels['users'] || {};
 
-            var powerLevel = userPowerLevels[userId];
+            let powerLevel = userPowerLevels[userId];
             if (!powerLevel) powerLevel = powerLevels['users_default'];
             if (!powerLevel) powerLevel = 0; // default
 
-            var statePowerLevel = powerLevels["state_default"];
+            let statePowerLevel = powerLevels["state_default"];
             if (!statePowerLevel) {
                 LogService.warn("ProvisioningService", "Unable to check permission for " + userId + " in " + roomId + " because the powerlevel requirement is missing for state_default");
                 return Promise.reject();
             }
 
-            var hasPermission = statePowerLevel <= powerLevel;
+            const hasPermission = statePowerLevel <= powerLevel;
 
             LogService.verbose("ProvisioningService", "User " + userId + " in room " + roomId + " has permission? " + hasPermission + " (required powerlevel = " + statePowerLevel + ", user powerlevel = " + powerLevel + ")");
 

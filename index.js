@@ -1,12 +1,12 @@
-var LogService = require("matrix-js-snippets").LogService;
-var Cli = require("matrix-appservice-bridge").Cli;
-var AppServiceRegistration = require("matrix-appservice-bridge").AppServiceRegistration;
-var path = require("path");
-var WebhookStore = require("./src/storage/WebhookStore");
-var WebhookBridge = require("./src/WebhookBridge");
-var WebService = require("./src/WebService");
+const LogService = require("matrix-js-snippets").LogService;
+const Cli = require("matrix-appservice-bridge").Cli;
+const AppServiceRegistration = require("matrix-appservice-bridge").AppServiceRegistration;
+const path = require("path");
+const WebhookStore = require("./src/storage/WebhookStore");
+const WebhookBridge = require("./src/WebhookBridge");
+const WebService = require("./src/WebService");
 
-var cli = new Cli({
+const cli = new Cli({
     registrationPath: "appservice-registration-webhooks.yaml",
     enableRegistration: true,
     enableLocalpart: true,
@@ -51,7 +51,7 @@ var cli = new Cli({
         registration.setRateLimited(false); // disabled because webhooks can get spammy
 
         if (!registration.getSenderLocalpart()) {
-            var config = cli.getConfig();
+            const config = cli.getConfig();
             registration.setSenderLocalpart(config.webhookBot.localpart);
         }
 
@@ -62,7 +62,7 @@ var cli = new Cli({
     run: function (port, config, registration) {
         LogService.configure(config.logging);
         LogService.info("index", "Preparing database...");
-        var bridge = null;
+        let bridge = null;
         WebhookStore.prepare()
             .then(() => {
                 LogService.info("index", "Preparing bridge...");

@@ -1,4 +1,4 @@
-var _ = require("lodash");
+const _ = require("lodash");
 
 /**
  * Processes user-admin related functions in Matrix. For example, this will allow
@@ -28,10 +28,10 @@ class AdminRoom {
     handleEvent(event) {
         if (!this._enabled) return;
 
-        var bridgeBot = this._bridge.getBotIntent();
+        const bridgeBot = this._bridge.getBotIntent();
         if (event.type === "m.room.member") {
             this._bridge.getBot().getJoinedMembers(this.roomId).then(members => {
-                var memberIds = _.keys(members);
+                const memberIds = _.keys(members);
                 if (memberIds.length > 2) { // should be 2 people, but sometimes our join hasn't landed yet
                     this._enabled = false;
                     bridgeBot.sendMessage(this.roomId, {

@@ -1,10 +1,10 @@
-var bodyParser = require("body-parser");
-var PubSub = require('pubsub-js');
-var LogService = require("matrix-js-snippets").LogService;
-var WebhookStore = require("./storage/WebhookStore");
-var ProvisioningService = require("./provisioning/ProvisioningService");
-var _ = require("lodash");
-var interceptor = require("express-interceptor");
+const bodyParser = require("body-parser");
+const PubSub = require('pubsub-js');
+const LogService = require("matrix-js-snippets").LogService;
+const WebhookStore = require("./storage/WebhookStore");
+const ProvisioningService = require("./provisioning/ProvisioningService");
+const _ = require("lodash");
+const interceptor = require("express-interceptor");
 
 // TODO: Migrate provisioning API out of this class
 
@@ -28,8 +28,8 @@ class WebService {
         this._app.use((err, req, res, next) => {
             LogService.error("WebService", err);
 
-            var status = 500;
-            var message = "Internal Server Error";
+            let status = 500;
+            let message = "Internal Server Error";
             if (err.message.startsWith("Unexpected token ") && err.message.includes("in JSON at position")) {
                 message = err.message;
                 status = 400;
@@ -50,7 +50,7 @@ class WebService {
     }
 
     _installInterceptor() {
-        var finalParagraphInterceptor = interceptor((req, res) => {
+        const finalParagraphInterceptor = interceptor((req, res) => {
             return {
                 isInterceptable: () => {
                     return res.get('Content-Type').startsWith("text/plain") || res.get('Content-Type').startsWith("text/html");
@@ -65,8 +65,8 @@ class WebService {
     }
 
     _constructError(res, body) {
-        var contentType = res.get('Content-Type');
-        var statusCode = res.statusCode;
+        const contentType = res.get('Content-Type');
+        const statusCode = res.statusCode;
 
         return {
             statusCode: statusCode,
@@ -79,14 +79,14 @@ class WebService {
     _postWebhook(request, response) {
         response.setHeader("Content-Type", "application/json");
 
-        var contentType = request.headers['content-type'];
+        const contentType = request.headers['content-type'];
         if (contentType && contentType.toLowerCase() === 'application/x-www-form-urlencoded') {
             request.body = JSON.parse(request.body.payload || "{}");
         } else if (typeof(request.body) === "string") {
             request.body = JSON.parse(request.body);
         }
 
-        var hookInfo = request.body;
+        let hookInfo = request.body;
         if (!hookInfo || !(hookInfo["text"] || (hookInfo["attachments"] && hookInfo["attachments"].length > 0))) {
             LogService.error("WebService [Hook " + request.params.hookId + "]", "Invalid message: missing text or attachments");
             response.status(400).send({error: 'Missing message text or attachments', success: false});
@@ -148,9 +148,9 @@ class WebService {
     }
 
     _provisionHook(request, response) {
-        var roomId = request.params.roomId;
-        var userId = request.query.userId;
-        var token = request.query.token;
+        const roomId = request.params.roomId;
+        const userId = request.query.userId;
+        const token = request.query.token;
 
         if (!this._provisioningApiTest(roomId, userId, token, response)) return;
 
@@ -161,9 +161,9 @@ class WebService {
     }
 
     _listHooks(request, response) {
-        var roomId = request.params.roomId;
-        var userId = request.query.userId;
-        var token = request.query.token;
+        const roomId = request.params.roomId;
+        const userId = request.query.userId;
+        const token = request.query.token;
 
         if (!this._provisioningApiTest(roomId, userId, token, response)) return;
 
@@ -176,10 +176,10 @@ class WebService {
     }
 
     _deleteHook(request, response) {
-        var hookId = request.params.hookId;
-        var roomId = request.params.roomId;
-        var userId = request.query.userId;
-        var token = request.query.token;
+        const hookId = request.params.hookId;
+        const roomId = request.params.roomId;
+        const userId = request.query.userId;
+        const token = request.query.token;
 
         if (!this._provisioningApiTest(roomId, userId, token, response, hookId, true)) return;
 

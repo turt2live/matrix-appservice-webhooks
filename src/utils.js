@@ -1,16 +1,16 @@
 // File based on the following implementation of utils.js in matrix-appservice-twitter by Half-Shot:
 // https://github.com/Half-Shot/matrix-appservice-twitter/blob/6fc01588e51a9eb9a32e14a6b0338abfd7cc32ea/src/util.js
 
-var https = require('https');
-var http = require('http');
-var Buffer = require("buffer").Buffer;
-var mime = require('mime');
-var parseDataUri = require("parse-data-uri");
-var request = require('request');
-var fs = require('fs');
-var mkdirp = require('mkdirp');
-var uuidv4 = require("uuid/v4");
-var path = require('path');
+const https = require('https');
+const http = require('http');
+const Buffer = require("buffer").Buffer;
+const mime = require('mime');
+const parseDataUri = require("parse-data-uri");
+const request = require('request');
+const fs = require('fs');
+const mkdirp = require('mkdirp');
+const uuidv4 = require("uuid/v4");
+const path = require('path');
 
 /**
  Utility module for regularly used functions.
@@ -28,12 +28,12 @@ var path = require('path');
  */
 function uploadContentFromUrl(bridge, url, id, name) {
     log.verbose("utils", "Downloading image from " + url);
-    var contenttype;
+    let contenttype;
     id = id || null;
     name = name || null;
     return new Promise((resolve, reject) => {
 
-        var ht = url.startsWith("https") ? https : http;
+        const ht = url.startsWith("https") ? https : http;
 
         ht.get((url), (res) => {
             if (res.headers.hasOwnProperty("content-type")) {
@@ -44,22 +44,22 @@ function uploadContentFromUrl(bridge, url, id, name) {
             }
 
             if (name == null) {
-                var parts = url.split("/");
+                const parts = url.split("/");
                 name = parts[parts.length - 1];
             }
-            var size = parseInt(res.headers["content-length"]);
+            let size = parseInt(res.headers["content-length"]);
             if (isNaN(size)) {
                 log.warn("UploadContentFromUrl", "Content-length is not valid. Assuming 512kb size");
                 size = 512 * 1024;
             }
-            var buffer;
+            let buffer;
             if (Buffer.alloc) {//Since 5.10
                 buffer = Buffer.alloc(size);
             } else {//Deprecated
                 buffer = new Buffer(size);
             }
 
-            var bsize = 0;
+            let bsize = 0;
             res.on('data', (d) => {
                 d.copy(buffer, bsize);
                 bsize += d.length;
@@ -81,7 +81,7 @@ function uploadContentFromUrl(bridge, url, id, name) {
             type: contenttype
         });
     }).then((response) => {
-        var content_uri = JSON.parse(response).content_uri;
+        const content_uri = JSON.parse(response).content_uri;
         log.info("UploadContent", "Media uploaded to " + content_uri);
         return content_uri;
     }).catch(function (reason) {
@@ -100,13 +100,13 @@ function uploadContentFromUrl(bridge, url, id, name) {
  */
 function uploadContentFromDataUri(bridge, id, uri, name) {
     if (!name || typeof(name) !== "string") name = "file";
-    var parsed = parseDataUri(uri);
+    const parsed = parseDataUri(uri);
     return bridge.getIntent(id).getClient().uploadContent({
         stream: parsed.data,
         name: name,
         type: parsed.mimeType
     }).then(response=> {
-        var content_uri = JSON.parse(response).content_uri;
+        const content_uri = JSON.parse(response).content_uri;
         log.info("uploadContentFromDataUri", "Media uploaded to " + content_uri);
         return content_uri;
     }).catch(function (reason) {
@@ -122,7 +122,7 @@ function uploadContentFromDataUri(bridge, id, uri, name) {
  */
 function downloadFile(uri, path) {
     return new Promise((resolve, reject) => {
-        var resolved = false;
+        let resolved = false;
         request(uri, (err, response, body) => {
             if (err) {
                 resolved = true;
@@ -141,9 +141,9 @@ function downloadFile(uri, path) {
  * @returns {Promise<string>} resolves to the file path, or null if something went wrong
  */
 function downloadFileTemp(uri, ext = '.data') {
-    var root = "temp";
-    var filename = uuidv4() + ext;
-    var fullpath = path.join(root, filename);
+    const root = "temp";
+    const filename = uuidv4() + ext;
+    const fullpath = path.join(root, filename);
 
     mkdirp.sync(root);
     return downloadFile(uri, fullpath).then(created => created ? fullpath : null);

@@ -1,7 +1,7 @@
-var ProvisioningService = require("./ProvisioningService");
-var LogService = require("matrix-js-snippets").LogService;
-var WebService = require("../WebService");
-var striptags = require("striptags");
+const ProvisioningService = require("./ProvisioningService");
+const LogService = require("matrix-js-snippets").LogService;
+const WebService = require("../WebService");
+const striptags = require("striptags");
 
 /**
  * An in-chat way to create and manage webhooks
@@ -29,8 +29,8 @@ class InteractiveProvisioner {
     createWebhook(userId, roomId, inRoomId) {
         ProvisioningService.createWebhook(roomId, userId).then(webhook => {
             return this._bridge.getOrCreateAdminRoom(userId).then(adminRoom => {
-                var url = WebService.getHookUrl(webhook.id);
-                var htmlMessage = "Here's your webhook url for " + roomId + ": <a href=\"" + url + "\">" + url + "</a><br>To send a message, POST the following JSON to that URL:" +
+                const url = WebService.getHookUrl(webhook.id);
+                const htmlMessage = "Here's your webhook url for " + roomId + ": <a href=\"" + url + "\">" + url + "</a><br>To send a message, POST the following JSON to that URL:" +
                     "<pre><code>" +
                     "{\n" +
                     "    \"text\": \"Hello world!\",\n" +

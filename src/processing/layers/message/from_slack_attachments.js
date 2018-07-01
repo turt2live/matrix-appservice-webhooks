@@ -7,9 +7,9 @@ const COLOR_MAP = {
 module.exports = (webhook, matrix) => {
     if (!webhook.attachments) return;
 
-    var combinedHtml = "";
-    for (var attachment of webhook.attachments) {
-        var color = "#f7f7f7";
+    let combinedHtml = "";
+    for (let attachment of webhook.attachments) {
+        let color = "#f7f7f7";
         if (attachment.color) color = attachment.color;
         if (COLOR_MAP[attachment.color]) color = COLOR_MAP[attachment.color];
 
@@ -46,7 +46,7 @@ module.exports = (webhook, matrix) => {
 
         // Fields
         if (attachment.fields) {
-            for (var field of attachment.fields) {
+            for (let field of attachment.fields) {
                 combinedHtml += "<b>" + field.title + "</b><br/>" + field.value + "<br/>";
             }
         }
