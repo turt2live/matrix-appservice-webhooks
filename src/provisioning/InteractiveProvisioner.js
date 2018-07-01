@@ -1,5 +1,5 @@
 var ProvisioningService = require("./ProvisioningService");
-var LogService = require("../LogService");
+var LogService = require("matrix-js-snippets").LogService;
 var WebService = require("../WebService");
 var striptags = require("striptags");
 

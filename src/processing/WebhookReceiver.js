@@ -1,4 +1,4 @@
-var LogService = require("../LogService");
+var LogService = require("matrix-js-snippets").LogService;
 var PubSub = require("pubsub-js");
 var Promise = require("bluebird");
 

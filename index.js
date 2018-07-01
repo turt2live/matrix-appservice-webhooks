@@ -1,4 +1,4 @@
-var LogService = require("./src/LogService");
+var LogService = require("matrix-js-snippets").LogService;
 var Cli = require("matrix-appservice-bridge").Cli;
 var AppServiceRegistration = require("matrix-appservice-bridge").AppServiceRegistration;
 var path = require("path");
@@ -27,9 +27,7 @@ var cli = new Cli({
                 }
             },
             web: {
-                hookUrlBase: 'http://localhost:4501',
-                bind: "0.0.0.0",
-                port: 4501
+                hookUrlBase: 'http://localhost:9000',
             },
             provisioning: {
                 secret: 'CHANGE_ME'
@@ -62,7 +60,7 @@ var cli = new Cli({
         callback(registration);
     },
     run: function (port, config, registration) {
-        LogService.init(config);
+        LogService.configure(config.logging);
         LogService.info("index", "Preparing database...");
         var bridge = null;
         WebhookStore.prepare()

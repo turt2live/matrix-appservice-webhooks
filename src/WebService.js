@@ -1,6 +1,6 @@
 var bodyParser = require("body-parser");
-var LogService = require("./LogService");
 var PubSub = require('pubsub-js');
+var LogService = require("matrix-js-snippets").LogService;
 var WebhookStore = require("./storage/WebhookStore");
 var ProvisioningService = require("./provisioning/ProvisioningService");
 var _ = require("lodash");

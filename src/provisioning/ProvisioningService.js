@@ -1,6 +1,6 @@
 var WebhookStore = require("../storage/WebhookStore");
 var Promise = require("bluebird");
-var LogService = require("../LogService");
+var LogService = require("matrix-js-snippets").LogService;
 
 class ProvisioningService {
 

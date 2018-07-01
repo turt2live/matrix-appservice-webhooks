@@ -1,5 +1,5 @@
 var DBMigrate = require("db-migrate");
-var LogService = require("./../LogService");
+var LogService = require("matrix-js-snippets").LogService;
 var Sequelize = require('sequelize');
 var dbConfig = require("../../config/database.json");
 var _ = require("lodash");

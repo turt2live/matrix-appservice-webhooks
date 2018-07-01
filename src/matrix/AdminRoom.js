@@ -1,5 +1,4 @@
 var _ = require("lodash");
-var LogService = require("../LogService");
 
 /**
  * Processes user-admin related functions in Matrix. For example, this will allow

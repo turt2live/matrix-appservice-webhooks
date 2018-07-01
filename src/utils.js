@@ -4,13 +4,12 @@
 var https = require('https');
 var http = require('http');
 var Buffer = require("buffer").Buffer;
-var log = require('./LogService');
 var mime = require('mime');
 var parseDataUri = require("parse-data-uri");
 var request = require('request');
 var fs = require('fs');
 var mkdirp = require('mkdirp');
-var uuid = require("uuid");
+var uuidv4 = require("uuid/v4");
 var path = require('path');
 
 /**
@@ -45,8 +44,8 @@ function uploadContentFromUrl(bridge, url, id, name) {
             }
 
             if (name == null) {
-                name = url.split("/");
-                name = name[name.length - 1];
+                var parts = url.split("/");
+                name = parts[parts.length - 1];
             }
             var size = parseInt(res.headers["content-length"]);
             if (isNaN(size)) {
@@ -143,7 +142,7 @@ function downloadFile(uri, path) {
  */
 function downloadFileTemp(uri, ext = '.data') {
     var root = "temp";
-    var filename = uuid.v4() + ext;
+    var filename = uuidv4() + ext;
     var fullpath = path.join(root, filename);
 
     mkdirp.sync(root);

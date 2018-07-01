@@ -31,6 +31,7 @@ logging:
   console: true
   consoleLevel: info
   fileLevel: verbose
+  writeFiles: true
   rotate:
     size: 52428800 # bytes, default is 50mb
     count: 5

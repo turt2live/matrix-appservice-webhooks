@@ -1,5 +1,5 @@
 var Bridge = require("matrix-appservice-bridge").Bridge;
-var LogService = require("./LogService");
+var LogService = require("matrix-js-snippets").LogService;
 var AdminRoom = require("./matrix/AdminRoom");
 var util = require("./utils");
 var WebhookStore = require("./storage/WebhookStore");
