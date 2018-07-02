@@ -1,7 +1,6 @@
 const DBMigrate = require("db-migrate");
 const LogService = require("matrix-js-snippets").LogService;
 const Sequelize = require('sequelize');
-const dbConfig = require("../../config/database.json");
 const _ = require("lodash");
 const randomString = require('random-string');
 
@@ -24,6 +23,7 @@ class WebhookStore {
         const env = process.env.NODE_ENV || "development";
         LogService.info("WebhookStore", "Running migrations");
         return new Promise((resolve, reject)=> {
+            const dbConfig = require.main.require(process.env["WEBHOOKS_DB_CONFIG_PATH"] || "./config/database.json");
             const dbMigrate = DBMigrate.getInstance(true, {
                 config: process.env["WEBHOOKS_DB_CONFIG_PATH"] || "./config/database.json",
                 env: env
