@@ -11,6 +11,7 @@ const fs = require('fs');
 const mkdirp = require('mkdirp');
 const uuidv4 = require("uuid/v4");
 const path = require('path');
+const LogService = require("matrix-js-snippets").LogService;
 
 /**
  Utility module for regularly used functions.
@@ -27,7 +28,7 @@ const path = require('path');
  * @return {Promise<string>} Promise resolving with a MXC URL.
  */
 function uploadContentFromUrl(bridge, url, id, name) {
-    log.verbose("utils", "Downloading image from " + url);
+    LogService.verbose("utils", "Downloading image from " + url);
     let contenttype;
     id = id || null;
     name = name || null;
@@ -39,7 +40,7 @@ function uploadContentFromUrl(bridge, url, id, name) {
             if (res.headers.hasOwnProperty("content-type")) {
                 contenttype = res.headers["content-type"];
             } else {
-                log.info("utils", "No content-type given by server, guessing based on file name.");
+                LogService.info("utils", "No content-type given by server, guessing based on file name.");
                 contenttype = mime.lookup(url);
             }
 
@@ -49,7 +50,7 @@ function uploadContentFromUrl(bridge, url, id, name) {
             }
             let size = parseInt(res.headers["content-length"]);
             if (isNaN(size)) {
-                log.warn("UploadContentFromUrl", "Content-length is not valid. Assuming 512kb size");
+                LogService.warn("UploadContentFromUrl", "Content-length is not valid. Assuming 512kb size");
                 size = 512 * 1024;
             }
             let buffer;
@@ -72,7 +73,7 @@ function uploadContentFromUrl(bridge, url, id, name) {
             });
         })
     }).then((buffer) => {
-        if (typeof id == "string" || id == null) {
+        if (typeof id === "string" || id == null) {
             id = bridge.getIntent(id);
         }
         return id.getClient().uploadContent({
@@ -82,10 +83,10 @@ function uploadContentFromUrl(bridge, url, id, name) {
         });
     }).then((response) => {
         const content_uri = JSON.parse(response).content_uri;
-        log.info("UploadContent", "Media uploaded to " + content_uri);
+        LogService.info("UploadContent", "Media uploaded to " + content_uri);
         return content_uri;
     }).catch(function (reason) {
-        log.error("UploadContent", "Failed to upload content:\n" + reason)
+        LogService.error("UploadContent", "Failed to upload content:\n" + reason)
     });
 }
 
@@ -107,10 +108,10 @@ function uploadContentFromDataUri(bridge, id, uri, name) {
         type: parsed.mimeType
     }).then(response=> {
         const content_uri = JSON.parse(response).content_uri;
-        log.info("uploadContentFromDataUri", "Media uploaded to " + content_uri);
+        LogService.info("uploadContentFromDataUri", "Media uploaded to " + content_uri);
         return content_uri;
     }).catch(function (reason) {
-        log.error("UploadContent", "Failed to upload content:\n" + reason)
+        LogService.error("UploadContent", "Failed to upload content:\n" + reason)
     });
 }
 
