@@ -24,7 +24,7 @@ provisioning:
 
 # Configuration related to the web portion of the bridge. Handles the inbound webhooks
 web:
-  hookUrlBase: 'http://localhost:4501/'
+  hookUrlBase: 'http://localhost:9000/'
 
 logging:
   file: logs/webhook.log
