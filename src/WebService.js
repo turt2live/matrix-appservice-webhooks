@@ -15,7 +15,7 @@ class WebService {
     setApp(app) {
         this._app = app;
         this._app.use(bodyParser.json());
-        this._app.use(bodyParser.urlencoded());
+        this._app.use(bodyParser.urlencoded({ extended: true }));
 
         // Logging incoming requests
         this._app.use((req, res, next) => {
