@@ -42,6 +42,7 @@ class WebhookStore {
                         min: 0,
                         idle: 10000
                     },
+                    operatorsAliases: false,
                     logging: i => LogService.verbose("WebhookStore [SQL]", i)
                 };
 
