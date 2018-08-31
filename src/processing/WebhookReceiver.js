@@ -26,6 +26,7 @@ class WebhookReceiver {
                 require("./layers/message/from_webhook"),
                 require("./layers/message/from_slack_attachments"),
                 require("./layers/message/emoji"),
+                require("./layers/message/slack_links"),
                 require("./layers/message/html"),
                 require("./layers/message/slack_fallback"),
                 require("./layers/message/html_fallback"),
