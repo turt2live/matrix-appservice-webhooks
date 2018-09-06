@@ -125,6 +125,7 @@ class WebhookBridge {
      * @private
      */
     _updateBotProfile() {
+        return;
         LogService.info("WebhookBridge", "Updating appearance of bridge bot");
 
         const desiredDisplayName = this._config.webhookBot.appearance.displayName || "Webhook Bridge";
