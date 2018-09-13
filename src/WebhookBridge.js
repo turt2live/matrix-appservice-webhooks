@@ -63,7 +63,7 @@ class WebhookBridge {
             .then(() => ProvisioningService.setClient(this.getBotIntent()))
             .then(() => InteractiveProvisioner.setBridge(this))
             .then(() => WebhookReceiver.setBridge(this))
-            .then(() => this._updateBotProfile())
+            //.then(() => this._updateBotProfile())
             .then(() => this._bridgeKnownRooms())
             .catch(error => LogService.error("WebhookBridge", error));
     }
