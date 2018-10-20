@@ -72,4 +72,22 @@ A Docker image of the bridge is available to host the bridge yourself. The image
 docker run -p 9000:9000 -v /path/to/webhooks/dir:/data turt2live/matrix-appservice-webhooks
 ```
 
-The `/path/to/webhooks/dir` should have an `appservice-webhooks-registration.yaml` file, `config.yaml`, and `database.json`. Additional bridge-related data will be stored here.
+The `/path/to/webhooks/dir` should have an `appservice-registration-webhooks.yaml` file, `config.yaml`, and `database.json`. Additional bridge-related data will be stored here.
+
+#### Example `appservice-registration-webhooks.yaml`
+
+```yaml
+id: webhooks
+hs_token: A_RANDOM_ALPHANUMERIC_STRING  # CHANGE THIS
+as_token: ANOTHER_RANDOM_ALPHANUMERIC_STRING  # CHANGE THIS
+namespaces:
+  users:
+    - exclusive: true
+      regex: '@_webhook.*'
+  aliases: []
+  rooms: []
+url: 'http://localhost:9002'  # you may need to change this (this should point at the bridge)
+sender_localpart: _webhook
+rate_limited: false
+protocols: null
+```
