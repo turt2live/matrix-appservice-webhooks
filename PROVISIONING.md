@@ -25,6 +25,13 @@ Creates a new incoming webhook for a room. Outgoing webhooks are not yet support
 | roomId    | The room's internal identifier | `!cURbafjkfsMDVwdRDQ:matrix.org` |
 | userId    | The user attempting to create the webhook | `@travis:t2l.io` |
 
+*Request Body*:
+```
+{
+  "label": "Optional label for the webhook"
+}
+```
+
 **Successful Response (200)**
 
 ```
@@ -61,6 +68,7 @@ Lists the webhooks created for a room. Will return an empty collection if no web
   "results": [
     {
       "id": "some_long_string",
+      "label": "First Webhook",
       "url": "https://webhook.t2bot.io/api/v1/matrix/hook/some_long_string",
       "userId": "@travis:t2l.io",
       "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org",
@@ -68,12 +76,76 @@ Lists the webhooks created for a room. Will return an empty collection if no web
     },
     {
       "id": "another_long_string",
+      "label": "Second Webhook",
       "url": "https://webhook.t2bot.io/api/v1/matrix/hook/another_long_string",
       "userId": "@turt2live:matrix.org",
       "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org",
       "type": "incoming"
     }
   ]
+}
+```
+
+**Possible Error Messages**
+
+* `User does not have permission to manage webhooks in this room` - appears for invalid room, user, or simple permissions error.
+
+### `GET /api/v1/provision/{roomId}/hook/{hookId}?userId={userId}`
+
+Gets the configuration for a given webhook in a room.
+
+**Inputs**
+
+| Parameter | Description | Example |
+| --------- | ----------- | ------- |
+| roomId    | The room's internal identifier | `!cURbafjkfsMDVwdRDQ:matrix.org` |
+| hookId    | The hook ID to get the configuration of | `some_long_string` |
+| userId    | The user attempting to view the webhooks | `@travis:t2l.io` |
+
+**Successful Response (200)**
+
+```
+{
+  "success": true,
+  "id": "some_long_string",
+  "label": "First Webhook",
+  "url": "https://webhook.t2bot.io/api/v1/matrix/hook/some_long_string",
+  "userId": "@travis:t2l.io",
+  "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org",
+  "type": "incoming"
+}
+```
+
+### `PUT /api/v1/provision/{roomId}/hook/{hookId}?userId={userId}`
+
+Updates the configuration for a webhook.
+
+**Inputs**
+
+| Parameter | Description | Example |
+| --------- | ----------- | ------- |
+| roomId    | The room's internal identifier | `!cURbafjkfsMDVwdRDQ:matrix.org` |
+| hookId    | The hook ID to set the configuration of | `some_long_string` |
+| userId    | The user attempting to view the webhooks | `@travis:t2l.io` |
+
+*Request Body*:
+```
+{
+  "label": "Optional label for the webhook"
+}
+```
+
+**Successful Response (200)**
+
+```
+{
+  "success": true,
+  "id": "some_long_string",
+  "label": "New Webhook Label",
+  "url": "https://webhook.t2bot.io/api/v1/matrix/hook/some_long_string",
+  "userId": "@travis:t2l.io",
+  "roomId": "!cURbafjkfsMDVwdRDQ:matrix.org",
+  "type": "incoming"
 }
 ```
 

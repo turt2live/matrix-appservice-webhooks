@@ -1,9 +1,6 @@
 # matrix-appservice-webhooks
 
 [![TravisCI badge](https://travis-ci.org/turt2live/matrix-appservice-webhooks.svg?branch=master)](https://travis-ci.org/turt2live/matrix-appservice-webhooks)
-[![API Documentation](https://img.shields.io/badge/api%20documentation-Postman-blue.svg)](https://documenter.getpostman.com/view/1707443/matrix-webhooks/6fYShpU)
-
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://app.getpostman.com/run-collection/803b1c8e7f6fad521390)
 
 Slack-compatible webhooks for Matrix. Talk about it on Matrix: [#webhooks:t2bot.io](https://matrix.to/#/#webhooks:t2bot.io)
 

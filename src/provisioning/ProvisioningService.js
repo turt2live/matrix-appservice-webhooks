@@ -21,14 +21,58 @@ class ProvisioningService {
      * Creates a new webhook for a room
      * @param {string} roomId the room ID the webhook belongs to
      * @param {string} userId the user trying to create the webhook
+     * @param {String|null} label optional label for the webhook
      * @returns {Promise<Webhook>} resolves to the created webhook
      */
-    createWebhook(roomId, userId) {
+    createWebhook(roomId, userId, label) {
         LogService.info("ProvisioningService", "Processing create hook request for " + roomId + " by " + userId);
         return this.hasPermission(userId, roomId)
             .then(async () => {
                 await this._intent.join(roomId);
-                return WebhookStore.createWebhook(roomId, userId)
+                return WebhookStore.createWebhook(roomId, userId, label)
+            }, () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
+    }
+
+    /***
+     * Updates a webhook's properties
+     * @param {string} roomId the room ID the webhook belongs to
+     * @param {string} userId the user trying to update the webhook
+     * @param {string} hookId the webhook ID
+     * @param {String|null} newLabel optional new label for the webhook
+     * @returns {Promise<Webhook>} resolves to the updated webhook
+     */
+    updateWebhook(roomId, userId, hookId, newLabel) {
+        LogService.info("ProvisioningService", "Processing webhook update request for " + roomId + " by " + userId);
+        return this.hasPermission(roomId, userId)
+            .then(async () => {
+                const webhook = await WebhookStore.getWebhook(hookId);
+                if (webhook.roomId !== roomId) return Promise.reject(this.PERMISSION_ERROR_MESSAGE);
+
+                let changed = false;
+                if (webhook.label !== newLabel) {
+                    webhook.label = newLabel;
+                    changed = true;
+                }
+
+                if (changed) await webhook.save();
+                return webhook;
+            }, () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
+    }
+
+    /**
+     * Gets a webhook
+     * @param {string} roomId the room ID to search in
+     * @param {string} userId the user trying to view the room's webhook
+     * @param {string} hookId the webhook ID
+     * @returns {Promise<Webhook>} resolves to the found webhook
+     */
+    getWebhook(roomId, userId, hookId) {
+        LogService.info("ProvisioningService", "Processing get hook request for " + roomId + " by " + userId);
+        return this.hasPermission(userId, roomId)
+            .then(async () => {
+                const webhook = await WebhookStore.getWebhook(hookId);
+                if (webhook.roomId !== roomId) return Promise.reject(this.PERMISSION_ERROR_MESSAGE);
+                return webhook;
             }, () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
     }
 

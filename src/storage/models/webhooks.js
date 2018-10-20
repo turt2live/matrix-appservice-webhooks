@@ -15,7 +15,12 @@ module.exports = function (sequelize, DataTypes) {
             type: DataTypes.STRING,
             allowNull: false,
             field: 'userId'
-        }
+        },
+        label: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            field: 'label',
+        },
     }, {
         tableName: 'webhooks',
         underscored: false,

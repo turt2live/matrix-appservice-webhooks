@@ -27,7 +27,7 @@ class InteractiveProvisioner {
      * @param {string} inRoomId the room ID the request started in
      */
     createWebhook(userId, roomId, inRoomId) {
-        ProvisioningService.createWebhook(roomId, userId).then(webhook => {
+        ProvisioningService.createWebhook(roomId, userId, null).then(webhook => {
             return this._bridge.getOrCreateAdminRoom(userId).then(adminRoom => {
                 const url = WebService.getHookUrl(webhook.id);
                 const htmlMessage = "Here's your webhook url for " + roomId + ": <a href=\"" + url + "\">" + url + "</a><br>To send a message, POST the following JSON to that URL:" +

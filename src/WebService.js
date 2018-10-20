@@ -46,6 +46,8 @@ class WebService {
         // Provisioning API
         this._app.put("/api/v1/provision/:roomId/hook", this._provisionHook.bind(this));
         this._app.get("/api/v1/provision/:roomId/hooks", this._listHooks.bind(this));
+        this._app.get("/api/v1/provision/:roomId/hook/:hookId", this._getHook.bind(this));
+        this._app.put("/api/v1/provision/:roomId/hook/:hookId", this._updateHook.bind(this));
         this._app.delete("/api/v1/provision/:roomId/hook/:hookId", this._deleteHook.bind(this));
     }
 
@@ -132,6 +134,7 @@ class WebService {
     _provisioningApiWebhook(webhook) {
         return {
             id: webhook.id,
+            label: webhook.label,
             userId: webhook.userId,
             roomId: webhook.roomId,
             url: this.getHookUrl(webhook.id),
@@ -158,6 +161,40 @@ class WebService {
 
         ProvisioningService.createWebhook(roomId, userId).then(webhook => {
             LogService.info("WebService", "Webhook created with provisioning api: " + webhook.id);
+            response.status(200).send(this._provisioningApiWebhook(webhook));
+        }).catch(error => this._provisioningApiCatch(error, response));
+    }
+
+    _getHook(request, response) {
+        const roomId = request.params.roomId;
+        const hookId = request.params.hookId;
+        const userId = request.query.userId;
+        const token = request.query.token;
+
+        if (!this._provisioningApiTest(roomId, userId, token, response, hookId, true)) return;
+
+        ProvisioningService.getWebhook(roomId, userId, hookId).then(webhook => {
+            response.status(200).send(this._provisioningApiWebhook(webhook));
+        }).catch(error => this._provisioningApiCatch(error, response));
+    }
+
+    _updateHook(request, response) {
+        const roomId = request.params.roomId;
+        const hookId = request.params.hookId;
+        const userId = request.query.userId;
+        const token = request.query.token;
+
+        if (typeof(request.body) === "string") {
+            request.body = JSON.parse(request.body);
+        } else if (!request.body) {
+            request.body = {};
+        }
+
+        const newLabel = request.body["label"];
+
+        if (!this._provisioningApiTest(roomId, userId, token, response, hookId, true)) return;
+
+        ProvisioningService.updateWebhook(roomId, userId, hookId, newLabel).then(webhook => {
             response.status(200).send(this._provisioningApiWebhook(webhook));
         }).catch(error => this._provisioningApiCatch(error, response));
     }

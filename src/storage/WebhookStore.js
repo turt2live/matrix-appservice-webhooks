@@ -115,13 +115,15 @@ class WebhookStore {
      * Creates a new webhook
      * @param {string} roomId the matrix room ID the webhook is for
      * @param {string} userId the matrix user who created the webhook
+     * @param {string} label optional label for the webhook
      * @returns {Promise<Webhook>} resolves to the created webhook
      */
-    createWebhook(roomId, userId) {
+    createWebhook(roomId, userId, label) {
         return this.__Webhooks.create({
             id: randomString({length: 64}),
             roomId: roomId,
-            userId: userId
+            userId: userId,
+            label: label,
         });
     }
 
