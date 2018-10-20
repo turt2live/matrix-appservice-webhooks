@@ -115,11 +115,13 @@ class WebService {
 
     _provisioningApiTest(roomId, userId, token, response, hookId = null, expectingHookId = false) {
         if (!roomId || !userId || !token || (!hookId && expectingHookId)) {
+            LogService.warn("WebService", "Request is missing a required parameter");
             response.status(400).send({success: false, message: ProvisioningService.PERMISSION_ERROR_MESSAGE});
             return false;
         }
 
         if (!this._token || this._token !== token) {
+            LogService.warn("WebService", "Invalid token");
             response.status(403).send({success: false, message: ProvisioningService.PERMISSION_ERROR_MESSAGE});
             return false;
         }

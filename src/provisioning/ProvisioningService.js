@@ -26,7 +26,10 @@ class ProvisioningService {
     createWebhook(roomId, userId) {
         LogService.info("ProvisioningService", "Processing create hook request for " + roomId + " by " + userId);
         return this.hasPermission(userId, roomId)
-            .then(() => WebhookStore.createWebhook(roomId, userId), () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
+            .then(async () => {
+                await this._intent.join(roomId);
+                return WebhookStore.createWebhook(roomId, userId)
+            }, () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
     }
 
     /**
@@ -50,8 +53,15 @@ class ProvisioningService {
      */
     deleteWebhook(roomId, userId, hookId) {
         LogService.info("ProvisioningService", "Processing delete hook (" + hookId + ") request for " + roomId + " by " + userId);
+
         return this.hasPermission(userId, roomId)
-            .then(() => WebhookStore.deleteWebhook(roomId, hookId), () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
+            .then(async () => {
+                const webhooks = await WebhookStore.listWebhooks(roomId);
+                if (webhooks.length === 1 && webhooks[0].id === hookId) {
+                    await this._intent.leave(roomId);
+                }
+                return WebhookStore.deleteWebhook(roomId, hookId)
+            }, () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
     }
 
     /**
