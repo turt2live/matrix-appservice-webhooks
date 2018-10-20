@@ -22,7 +22,7 @@ class WebhookStore {
     prepare() {
         const env = process.env.NODE_ENV || "development";
         LogService.info("WebhookStore", "Running migrations");
-        return new Promise((resolve, reject)=> {
+        return new Promise((resolve, reject) => {
             const dbConfig = require.main.require(process.env["WEBHOOKS_DB_CONFIG_PATH"] || "./config/database.json");
             const dbMigrate = DBMigrate.getInstance(true, {
                 config: process.env["WEBHOOKS_DB_CONFIG_PATH"] || "./config/database.json",
@@ -32,6 +32,14 @@ class WebhookStore {
             dbMigrate.up().then(() => {
                 let dbConfigEnv = dbConfig[env];
                 if (!dbConfigEnv) throw new Error("Could not find DB config for " + env);
+
+                if (process.env["WEBHOOKS_ENV"] === "docker") {
+                    const expectedPath = path.join("data", path.basename(dbConfigEnv.filename));
+                    if (expectedPath !== dbConfigEnv.filename) {
+                        LogService.warn("WebhokStore", "Changing database path to be " + expectedPath + " to ensure data is persisted");
+                        dbConfigEnv.filename = expectedPath;
+                    }
+                }
 
                 const opts = {
                     host: dbConfigEnv.host || 'localhost',
