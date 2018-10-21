@@ -32,13 +32,11 @@ class ProvisioningService {
      * @param {String|null} label optional label for the webhook
      * @returns {Promise<Webhook>} resolves to the created webhook
      */
-    createWebhook(roomId, userId, label) {
+    async createWebhook(roomId, userId, label) {
         LogService.info("ProvisioningService", "Processing create hook request for " + roomId + " by " + userId);
+        await this._intent.join(roomId);
         return this.hasPermission(userId, roomId)
-            .then(async () => {
-                await this._intent.join(roomId);
-                return WebhookStore.createWebhook(roomId, userId, label)
-            }, () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
+            .then(() => WebhookStore.createWebhook(roomId, userId, label), () => Promise.reject(this.PERMISSION_ERROR_MESSAGE));
     }
 
     /***
