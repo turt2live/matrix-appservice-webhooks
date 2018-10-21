@@ -14,6 +14,27 @@ All endpoints use the following format for errors (anything not in the 2xx range
 
 All endpoints also require the query parameter `token` with the value being the secret in the bridge's configuration. If this token is missing (or not changed from the default), the error will appear as a generic permissions failure. Inspect the response code to determine the nature of the failure (ie: 400 is bad request, 500 is something broken on our end, 403 is wrong token).
 
+### `GET /api/v1/provision/info`
+
+Gets information about the bridge instance, such as the bridge bot user ID.
+
+**Inputs**
+
+* *None*
+
+**Successful Response (200)**
+
+```
+{
+  "success": true,
+  "botUserId": "@webhook:t2bot.io"
+}
+```
+
+**Possible Error Messages**
+
+* *None*
+
 ### `PUT /api/v1/provision/{roomId}/hook?userId={userId}`
 
 Creates a new incoming webhook for a room. Outgoing webhooks are not yet supported by the bridge.

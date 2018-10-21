@@ -15,7 +15,7 @@ class WebService {
     setApp(app) {
         this._app = app;
         this._app.use(bodyParser.json());
-        this._app.use(bodyParser.urlencoded({ extended: true }));
+        this._app.use(bodyParser.urlencoded({extended: true}));
 
         // Logging incoming requests
         this._app.use((req, res, next) => {
@@ -44,6 +44,7 @@ class WebService {
         this._app.post("/api/v1/matrix/hook/:hookId", this._postWebhook.bind(this));
 
         // Provisioning API
+        this._app.get("/api/v1/provision/info", this._getBridgeInfo.bind(this));
         this._app.put("/api/v1/provision/:roomId/hook", this._provisionHook.bind(this));
         this._app.get("/api/v1/provision/:roomId/hooks", this._listHooks.bind(this));
         this._app.get("/api/v1/provision/:roomId/hook/:hookId", this._getHook.bind(this));
@@ -150,6 +151,20 @@ class WebService {
 
         LogService.error("WebService", error);
         response.status(500).send({success: false, message: "Unknown error processing request"});
+    }
+
+    _getBridgeInfo(request, response) {
+        const token = request.query.token;
+
+        if (!this._token || this._token !== token) {
+            LogService.warn("WebService", "Invalid token");
+            response.status(403).send({success: false, message: ProvisioningService.PERMISSION_ERROR_MESSAGE});
+        } else {
+            response.status(200).send({
+                success: true,
+                botUserId: ProvisioningService.getBotUserId(),
+            });
+        }
     }
 
     _provisionHook(request, response) {

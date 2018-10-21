@@ -18,6 +18,14 @@ class ProvisioningService {
     }
 
     /**
+     * Gets the bot user ID for the bridge
+     * @return {string} the bot user ID
+     */
+    getBotUserId() {
+        return this._intent.getClient().credentials.userId;
+    }
+
+    /**
      * Creates a new webhook for a room
      * @param {string} roomId the room ID the webhook belongs to
      * @param {string} userId the user trying to create the webhook
