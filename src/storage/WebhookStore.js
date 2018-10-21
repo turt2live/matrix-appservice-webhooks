@@ -2,6 +2,7 @@ const DBMigrate = require("db-migrate");
 const LogService = require("matrix-js-snippets").LogService;
 const Sequelize = require('sequelize');
 const _ = require("lodash");
+const path = require("path");
 const randomString = require('random-string');
 
 /**
