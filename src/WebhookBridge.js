@@ -215,8 +215,8 @@ class WebhookBridge {
             const roomMemberIds = _.keys(members);
             const botIdx = roomMemberIds.indexOf(this._bridge.getBot().getUserId());
 
-            if (roomMemberIds.length == 2 || adminRoomOwner) {
-                const otherUserId = roomMemberIds[botIdx == 0 ? 1 : 0];
+            if (roomMemberIds.length === 2 || adminRoomOwner) {
+                const otherUserId = roomMemberIds[botIdx === 0 ? 1 : 0];
                 this._adminRooms[roomId] = new AdminRoom(roomId, this, otherUserId || adminRoomOwner);
                 LogService.verbose("WebhookBridge", "Added admin room for user " + (otherUserId || adminRoomOwner));
             } // else it is just a regular room
