@@ -157,9 +157,17 @@ class WebService {
         const userId = request.query.userId;
         const token = request.query.token;
 
+        if (typeof(request.body) === "string") {
+            request.body = JSON.parse(request.body);
+        } else if (!request.body) {
+            request.body = {};
+        }
+
+        const label = request.body["label"];
+
         if (!this._provisioningApiTest(roomId, userId, token, response)) return;
 
-        ProvisioningService.createWebhook(roomId, userId).then(webhook => {
+        ProvisioningService.createWebhook(roomId, userId, label).then(webhook => {
             LogService.info("WebService", "Webhook created with provisioning api: " + webhook.id);
             response.status(200).send(this._provisioningApiWebhook(webhook));
         }).catch(error => this._provisioningApiCatch(error, response));
