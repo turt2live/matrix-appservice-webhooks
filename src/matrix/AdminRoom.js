@@ -1,3 +1,4 @@
+const LogService = require("matrix-js-snippets").LogService;
 const _ = require("lodash");
 
 /**
@@ -41,6 +42,10 @@ class AdminRoom {
                         return this._bridge.removeAdminRoom(this.roomId);
                     });
                 }
+            }).catch(e => {
+                LogService.error("AdminRoom", "Error in handling room " + this.roomId + " - removing as an admin room");
+                LogService.error("AdminRoom", e);
+                this._bridge.removeAdminRoom(this.roomId);
             });
         } else if (event.type === "m.room.message") {
             if (event.sender === this._bridge.getBot().getUserId()) return;
