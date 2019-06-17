@@ -90,6 +90,7 @@ class WebService {
         }
 
         let hookInfo = request.body;
+        LogService.verbose("WebService [Hook " + request.params.hookId + "]", hookInfo);
         if (!hookInfo || !(hookInfo["text"] || (hookInfo["attachments"] && hookInfo["attachments"].length > 0))) {
             LogService.error("WebService [Hook " + request.params.hookId + "]", "Invalid message: missing text or attachments");
             response.status(400).send({error: 'Missing message text or attachments', success: false});
