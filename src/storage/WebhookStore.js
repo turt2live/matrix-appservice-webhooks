@@ -162,6 +162,7 @@ class Webhook {
         this.id = dbFields.id;
         this.roomId = dbFields.roomId;
         this.userId = dbFields.userId;
+        this.label = dbFields.label;
     }
 }
 
