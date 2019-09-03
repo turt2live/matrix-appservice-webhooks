@@ -1,7 +1,7 @@
 const LogService = require("matrix-js-snippets").LogService;
 const PubSub = require("pubsub-js");
 const Promise = require("bluebird");
-
+const slug = require("limax");
 class WebhookReceiver {
     constructor() {
         PubSub.subscribe("incoming_webhook", this._postMessage.bind(this));
@@ -69,7 +69,7 @@ class WebhookReceiver {
         this._getLayers().forEach(a => layerChain = layerChain.then(() => a(webhookEvent.payload, matrixPayload)));
 
         layerChain.then(() => {
-            const localpart = (webhookEvent.hook.roomId + "_" + matrixPayload.sender.displayName).replace(/[^a-zA-Z0-9]/g, '_');
+            const localpart = slug(webhookEvent.hook.roomId + "_" + matrixPayload.sender.displayName,{separator: '_'});
             const intent = this._bridge.getWebhookUserIntent(localpart);
 
             // Update profile, try join, fall back to invite, and try to send message

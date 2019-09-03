@@ -32,6 +32,7 @@
     "emojione": "^3.1.7",
     "express": "^4.16.4",
     "express-interceptor": "^1.2.0",
+    "limax": "^1.7.0",
     "lodash": "^4.17.11",
     "matrix-appservice-bridge": "^1.7.0",
     "matrix-js-snippets": "^0.2.8",
