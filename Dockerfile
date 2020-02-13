@@ -1,7 +1,7 @@
 ############################################################
 #
 # base stage
-FROM node:10-alpine AS base
+FROM node:13-alpine AS base
 
 RUN apk upgrade --no-cache
 RUN apk add --no-cache ca-certificates
