@@ -12,17 +12,20 @@ RUN apk add --no-cache ca-certificates
 # build stage - just build the app
 FROM base AS build
 
-COPY package.json /srv/matrix-appservice-webhooks/
-COPY package-lock.json /srv/matrix-appservice-webhooks/
-COPY index.js /srv/matrix-appservice-webhooks/
-COPY src /srv/matrix-appservice-webhooks/src
-COPY config /srv/matrix-appservice-webhooks/config
-COPY migrations /srv/matrix-appservice-webhooks/migrations
-
 ENV NODE_ENV=development
+
 RUN apk add --no-cache \
     make gcc g++ python libc-dev wget git dos2unix
+
 WORKDIR /srv/matrix-appservice-webhooks
+
+COPY package.json ./
+COPY package-lock.json ./
+COPY index.js ./
+COPY src ./src
+COPY config ./config
+COPY migrations ./migrations
+
 RUN npm install
 
 
