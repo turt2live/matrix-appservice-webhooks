@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Migrate the registration file if possible
 if [ ! -f "/data/appservice-registration-webhooks.yaml" ]; then
