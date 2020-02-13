@@ -19,8 +19,6 @@ RUN apk add --no-cache \
     make gcc g++ python libc-dev wget git dos2unix
 WORKDIR /srv/matrix-appservice-webhooks
 RUN npm install
-RUN dos2unix docker-start.sh
-RUN chmod +x docker-start.sh
 
 
 ############################################################
@@ -34,10 +32,14 @@ ENV WEBHOOKS_ROOM_STORE_PATH=/data/room-store.db
 ENV WEBHOOKS_DB_CONFIG_PATH=/data/database.json
 ENV WEBHOOKS_ENV=docker
 
-COPY --from=build /srv/matrix-appservice-webhooks/* /
-
 WORKDIR /
-CMD /docker-start.sh
+
+COPY --from=build /srv/matrix-appservice-webhooks ./
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN mkdir -p ./db
+
+ENTRYPOINT [ "docker-entrypoint.sh" ]
+CMD [ "node", "index.js", "-p", "9000", "-c", "/data/config.yaml", "-f", "/data/appservice-registration-webhooks.yaml" ]
 
 EXPOSE 9000
 VOLUME ["/data"]
