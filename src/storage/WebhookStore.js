@@ -37,7 +37,7 @@ class WebhookStore {
                 if (process.env["WEBHOOKS_ENV"] === "docker") {
                     const expectedPath = path.join("data", path.basename(dbConfigEnv.filename));
                     if (expectedPath !== dbConfigEnv.filename) {
-                        LogService.warn("WebhokStore", "Changing database path to be " + expectedPath + " to ensure data is persisted");
+                        LogService.warn("WebhookStore", "Changing database path to be " + expectedPath + " to ensure data is persisted");
                         dbConfigEnv.filename = expectedPath;
                     }
                 }
