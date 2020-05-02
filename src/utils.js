@@ -41,7 +41,7 @@ function uploadContentFromUrl(bridge, url, id, name) {
                 contenttype = res.headers["content-type"];
             } else {
                 LogService.info("utils", "No content-type given by server, guessing based on file name.");
-                contenttype = mime.lookup(url);
+                contenttype = mime.getType(url);
             }
 
             if (name == null) {
