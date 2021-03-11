@@ -15,7 +15,7 @@ Invite the webhook bridge to your room (`@_webhook:t2bot.io`) and send the messa
   "text": "Hello world!",
   "format": "plain",
   "displayName": "My Cool Webhook",
-  "avatarUrl": "http://i.imgur.com/IDOBtEJ.png"
+  "avatar_url": "http://i.imgur.com/IDOBtEJ.png"
 }
 ```
 
