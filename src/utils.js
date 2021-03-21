@@ -55,13 +55,13 @@ function uploadContentFromUrl(bridge, url, id, name) {
         if (typeof id === "string" || id == null) {
             id = bridge.getIntent(id);
         }
-        return id.getClient().uploadContent({
-            stream: buffer,
+        return id.getClient().uploadContent(buffer, {
             name: name,
-            type: contenttype
+            type: contenttype,
+            rawResponse: false
         });
     }).then((response) => {
-        const content_uri = JSON.parse(response).content_uri;
+        const content_uri = response.content_uri;
         LogService.info("UploadContent", "Media uploaded to " + content_uri);
         return content_uri;
     }).catch(function (reason) {
