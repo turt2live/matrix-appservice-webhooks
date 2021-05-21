@@ -194,9 +194,15 @@ class WebhookBridge {
      * @private
      */
     _bridgeKnownRooms() {
+        const process = (roomId) => {
+            this._processRoom(roomId).catch(e => {
+                LogService.error("WebhookBridge", `Error bridging room ${roomId}:`);
+                LogService.error("WebhookBridge", e);
+            });
+        };
         this._bridge.getBot().getJoinedRooms().then(rooms => {
             for (let roomId of rooms) {
-                this._processRoom(roomId);
+                process(roomId);
             }
         });
     }
