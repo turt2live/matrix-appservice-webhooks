@@ -15,7 +15,7 @@ FROM base AS build
 ENV NODE_ENV=development
 
 RUN apk add --no-cache \
-    make gcc g++ python libc-dev wget git dos2unix
+    make gcc g++ python3 libc-dev wget git dos2unix
 
 WORKDIR /srv/matrix-appservice-webhooks
 
@@ -27,6 +27,7 @@ COPY config ./config
 COPY migrations ./migrations
 
 RUN npm install
+RUN npm audit fix
 
 
 ############################################################
