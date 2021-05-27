@@ -1,7 +1,7 @@
 ############################################################
 #
 # base stage
-FROM node:13-alpine AS base
+FROM node:12-alpine AS base
 
 RUN apk upgrade --no-cache
 RUN apk add --no-cache ca-certificates
@@ -47,7 +47,7 @@ COPY --from=build /srv/matrix-appservice-webhooks ./
 COPY docker-entrypoint.sh /usr/local/bin/
 RUN mkdir -p ./db
 
-ENTRYPOINT [ "docker-entrypoint.sh" ]
+ENTRYPOINT [ "/usr/local/bin/docker-entrypoint.sh" ]
 CMD [ "node", "index.js", "-p", "9000", "-c", "/data/config.yaml", "-f", "/data/appservice-registration-webhooks.yaml" ]
 
 EXPOSE 9000
