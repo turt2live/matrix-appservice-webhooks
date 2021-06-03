@@ -33,5 +33,5 @@ jobs:
           context: .
           push: true
           tags: |
-            ghcr.io/netresearch/matrix-appservice-webhooks:latest
-            ghcr.io/netresearch/matrix-appservice-webhooks:${{ steps.get_version.outputs.version }}
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.get_version.outputs.version }}
