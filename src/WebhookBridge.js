@@ -63,7 +63,7 @@ class WebhookBridge {
             .then(() => ProvisioningService.setClient(this.getBotIntent()))
             .then(() => InteractiveProvisioner.setBridge(this))
             .then(() => WebhookReceiver.setBridge(this))
-            //.then(() => this._updateBotProfile())
+            .then(() => this._updateBotProfile())
             .then(() => this._bridgeKnownRooms())
             .catch(error => LogService.error("WebhookBridge", error));
     }
@@ -125,7 +125,7 @@ class WebhookBridge {
      * @private
      */
     _updateBotProfile() {
-        return;
+        // return;
         LogService.info("WebhookBridge", "Updating appearance of bridge bot");
 
         const desiredDisplayName = this._config.webhookBot.appearance.displayName || "Webhook Bridge";
@@ -159,8 +159,8 @@ class WebhookBridge {
     updateHookProfile(intent, desiredDisplayName, desiredAvatarUrl) {
         LogService.info("WebhookBridge", "Updating appearance of " + intent.getClient().credentials.userId);
 
-        return WebhookStore.getAccountData(intent.getClient().credentials.userId).then(botProfile => {
-            const promises = [];
+        return WebhookStore.getAccountData(intent.getClient().credentials.userId).then(async botProfile => {
+            const promisesTasks = [];
 
             let avatarUrl = botProfile.avatarUrl;
             if ((!avatarUrl || avatarUrl !== desiredAvatarUrl) && desiredAvatarUrl) {
@@ -168,24 +168,28 @@ class WebhookBridge {
                 if (!desiredAvatarUrl.startsWith("mxc://"))
                     uploadPromise = util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, this.getBotIntent());
 
-                promises.push(uploadPromise.then(mxcUrl => {
+                    promisesTasks.push(()=>uploadPromise.then(mxcUrl => {
                     LogService.verbose("WebhookBridge", "Avatar MXC URL = " + mxcUrl);
                     LogService.info("WebhookBridge", "Updating avatar for " + intent.getClient().credentials.userId);
                     return intent.setAvatarUrl(mxcUrl).then(() => {
                         botProfile.avatarUrl = desiredAvatarUrl;
-                        WebhookStore.setAccountData(intent.getClient().credentials.userId, botProfile);
+                        return WebhookStore.setAccountData(intent.getClient().credentials.userId, botProfile);
                     });
                 }));
             }
+            
 
-            promises.push(intent.getProfileInfo(intent.getClient().credentials.userId, 'displayname').then(profile => {
-                if (profile.displayname != desiredDisplayName) {
-                    LogService.info("WebhookBridge", "Updating display name from '" + profile.displayname + "' to '" + desiredDisplayName + "' on " + intent.getClient().credentials.userId);
-                    intent.setDisplayName(desiredDisplayName);
-                }
-            }));
-
-            return Promise.all(promises);
+            promisesTasks.push(()=>intent.getProfileInfo(intent.getClient().credentials.userId, 'displayname',false)
+                .then(profile => {
+                    if (profile.displayname != desiredDisplayName) {
+                        LogService.info("WebhookBridge", "Updating display name from '" + profile.displayname + "' to '" + desiredDisplayName + "' on " + intent.getClient().credentials.userId);
+                        return intent.setDisplayName(desiredDisplayName);
+                    }
+                }));
+            
+            
+            
+            return util.runSerialPromise(promisesTasks);
         });
     }
 

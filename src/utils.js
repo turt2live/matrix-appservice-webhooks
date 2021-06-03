@@ -150,9 +150,19 @@ function downloadFileTemp(uri, ext = '.data') {
     return downloadFile(uri, fullpath).then(created => created ? fullpath : null);
 }
 
+
+function runSerialPromise(tasks) {
+    var result = Promise.resolve();
+    tasks.forEach(task => {
+      result = result.then(task);
+    });
+    return result;
+}
+
 module.exports = {
     uploadContentFromUrl: uploadContentFromUrl,
     uploadContentFromDataUri: uploadContentFromDataUri,
     downloadFile: downloadFile,
     downloadFileTemp: downloadFileTemp,
+    runSerialPromise:runSerialPromise
 };
