@@ -1,6 +1,6 @@
 # matrix-appservice-webhooks
 
-[![TravisCI badge](https://travis-ci.org/turt2live/matrix-appservice-webhooks.svg?branch=master)](https://travis-ci.org/turt2live/matrix-appservice-webhooks)
+![example branch parameter](https://github.com/netresearch/matrix-appservice-webhooks/actions/workflows/publish.when-tagged.yml/badge.svg?branch=master)
 
 Slack-compatible webhooks for Matrix. Talk about it on Matrix: [#webhooks:t2bot.io](https://matrix.to/#/#webhooks:t2bot.io)
 
