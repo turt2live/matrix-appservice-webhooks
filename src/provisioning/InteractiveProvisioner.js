@@ -36,7 +36,7 @@ class InteractiveProvisioner {
                     "    \"text\": \"Hello world!\",\n" +
                     "    \"format\": \"plain\",\n" +
                     "    \"displayName\": \"My Cool Webhook\",\n" +
-                    "    \"avatarUrl\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
+                    "    \"avatar_url\": \"http://i.imgur.com/IDOBtEJ.png\"\n" +
                     "}" +
                     "</code></pre>" +
                     "If you run into any issues, visit <a href=\"https://matrix.to/#/#webhooks:t2bot.io\">#webhooks:t2bot.io</a>";

@@ -129,18 +129,18 @@ class WebhookBridge {
         LogService.info("WebhookBridge", "Updating appearance of bridge bot");
 
         const desiredDisplayName = this._config.webhookBot.appearance.displayName || "Webhook Bridge";
-        const desiredAvatarUrl = this._config.webhookBot.appearance.avatarUrl || "http://i.imgur.com/IDOBtEJ.png"; // webhook icon
+        const desiredAvatarUrl = this._config.webhookBot.appearance.avatar_url || "http://i.imgur.com/IDOBtEJ.png"; // webhook icon
 
         const botIntent = this.getBotIntent();
 
         WebhookStore.getAccountData('bridge').then(botProfile => {
-            let avatarUrl = botProfile.avatarUrl;
-            if (!avatarUrl || avatarUrl !== desiredAvatarUrl) {
+            let avatar_url = botProfile.avatar_url;
+            if (!avatar_url || avatar_url !== desiredAvatarUrl) {
                 util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, botIntent).then(mxcUrl => {
                     LogService.verbose("WebhookBridge", "Avatar MXC URL = " + mxcUrl);
                     LogService.info("WebhookBridge", "Updating avatar for bridge bot");
                     botIntent.setAvatarUrl(mxcUrl);
-                    botProfile.avatarUrl = desiredAvatarUrl;
+                    botProfile.avatar_url = desiredAvatarUrl;
                     WebhookStore.setAccountData('bridge', botProfile);
                 });
             }
@@ -162,8 +162,8 @@ class WebhookBridge {
         return WebhookStore.getAccountData(intent.getClient().credentials.userId).then(botProfile => {
             const promises = [];
 
-            let avatarUrl = botProfile.avatarUrl;
-            if ((!avatarUrl || avatarUrl !== desiredAvatarUrl) && desiredAvatarUrl) {
+            let avatar_url = botProfile.avatar_url;
+            if ((!avatar_url || avatar_url !== desiredAvatarUrl) && desiredAvatarUrl) {
                 let uploadPromise = Promise.resolve(desiredAvatarUrl);
                 if (!desiredAvatarUrl.startsWith("mxc://"))
                     uploadPromise = util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, this.getBotIntent());
@@ -172,7 +172,7 @@ class WebhookBridge {
                     LogService.verbose("WebhookBridge", "Avatar MXC URL = " + mxcUrl);
                     LogService.info("WebhookBridge", "Updating avatar for " + intent.getClient().credentials.userId);
                     return intent.setAvatarUrl(mxcUrl).then(() => {
-                        botProfile.avatarUrl = desiredAvatarUrl;
+                        botProfile.avatar_url = desiredAvatarUrl;
                         WebhookStore.setAccountData(intent.getClient().credentials.userId, botProfile);
                     });
                 }));

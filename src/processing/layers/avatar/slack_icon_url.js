@@ -1,4 +1,4 @@
 module.exports = (webhook, matrix) => {
-    if (!matrix.sender.avatarUrl && webhook.icon_url)
-        matrix.sender.avatarUrl = webhook.icon_url;
+    if (!matrix.sender.avatar_url && webhook.icon_url)
+        matrix.sender.avatar_url = webhook.icon_url;
 };
