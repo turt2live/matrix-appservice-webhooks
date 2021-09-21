@@ -1,4 +1,4 @@
-const emojione = require("emojione");
+const emojione = require("emoji-toolkit");
 const cheerio = require("cheerio");
 
 emojione.emojiSize = '128';
@@ -10,7 +10,8 @@ module.exports = (webhook, matrix) => {
         const imgElement = emojione.shortnameToImage(webhook.icon_emoji);
         if (imgElement == webhook.icon_emoji) return;
 
-        const srcUrl = cheerio.load(imgElement).attr('src');
-        matrix.sender.avatar_url = srcUrl;
+        const $ = cheerio.load(imgElement); //.attr('src');
+
+        matrix.sender.avatar_url = $('img').attr('src');
     }
 };
