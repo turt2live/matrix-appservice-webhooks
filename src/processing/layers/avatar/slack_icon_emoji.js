@@ -10,7 +10,7 @@ module.exports = (webhook, matrix) => {
         const imgElement = emojione.shortnameToImage(webhook.icon_emoji);
         if (imgElement == webhook.icon_emoji) return;
 
-        const srcUrl = cheerio(imgElement).attr('src');
+        const srcUrl = cheerio.load(imgElement).attr('src');
         matrix.sender.avatarUrl = srcUrl;
     }
 };
