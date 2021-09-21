@@ -19,16 +19,11 @@ jobs:
       - name: Get latest release version number
         id: get_version
         uses: battila7/get-version-action@v2
-
-      - id: string
-        uses: ASzc/change-string-case-action@v1
-        with:
-          string: ${{ github.repository_owner }}
           
       - name: 🔑 Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
-          username: ${{ steps.string.outputs.lowercase }}
+          username: ${{ github.repository_owner }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: 🚀 Build and push
