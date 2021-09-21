@@ -94,3 +94,7 @@ sender_localpart: _webhook
 rate_limited: false
 protocols: null
 ```
+
+## Credits
+
+Use Emoji Images from https://www.emojione.com/licenses/free
