@@ -60,7 +60,7 @@ class WebhookReceiver {
             },
             sender: {
                 displayName: null,
-                avatarUrl: null,
+                avatar_url: null,
             }
         };
 
@@ -74,7 +74,7 @@ class WebhookReceiver {
 
             // Update profile, try join, fall back to invite, and try to send message
             const postFn = () => intent.sendMessage(webhookEvent.hook.roomId, matrixPayload.event);
-            this._bridge.updateHookProfile(intent, matrixPayload.sender.displayName, matrixPayload.sender.avatarUrl)
+            this._bridge.updateHookProfile(intent, matrixPayload.sender.displayName, matrixPayload.sender.avatar_url)
                 .then(() => {
                     return intent.join(webhookEvent.hook.roomId).then(postFn, err => {
                         LogService.error("WebhookReceiver", err);
