@@ -1,7 +1,11 @@
 .git
 .gitignore
+.travis.yml
 README.md
+data
 Dockerfile
 docker-compose.yml
 node_modules
 logs
+LICENSE
+PROVISIONING.md
