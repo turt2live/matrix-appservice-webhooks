@@ -126,31 +126,6 @@ class WebhookBridge {
      */
     _updateBotProfile() {
         return;
-        LogService.info("WebhookBridge", "Updating appearance of bridge bot");
-
-        const desiredDisplayName = this._config.webhookBot.appearance.displayName || "Webhook Bridge";
-        const desiredAvatarUrl = this._config.webhookBot.appearance.avatar_url || "http://i.imgur.com/IDOBtEJ.png"; // webhook icon
-
-        const botIntent = this.getBotIntent();
-
-        WebhookStore.getAccountData('bridge').then(botProfile => {
-            let avatar_url = botProfile.avatar_url;
-            if (!avatar_url || avatar_url !== desiredAvatarUrl) {
-                util.uploadContentFromUrl(this._bridge, desiredAvatarUrl, botIntent).then(mxcUrl => {
-                    LogService.verbose("WebhookBridge", "Avatar MXC URL = " + mxcUrl);
-                    LogService.info("WebhookBridge", "Updating avatar for bridge bot");
-                    botIntent.setAvatarUrl(mxcUrl);
-                    botProfile.avatar_url = desiredAvatarUrl;
-                    WebhookStore.setAccountData('bridge', botProfile);
-                });
-            }
-            botIntent.getProfileInfo(this._bridge.getBot().getUserId(), 'displayname').then(profile => {
-                if (profile.displayname != desiredDisplayName) {
-                    LogService.info("WebhookBridge", "Updating display name from '" + profile.displayname + "' to '" + desiredDisplayName + "'");
-                    botIntent.setDisplayName(desiredDisplayName);
-                }
-            });
-        });
     }
 
     /**
