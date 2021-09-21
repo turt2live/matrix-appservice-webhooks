@@ -5,7 +5,7 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/turt2live/matrix-appservice-webhooks.git"
+    "url": "git+https://github.com/redoonetworks/matrix-appservice-webhooks.git"
   },
   "keywords": [
     "matrix",
@@ -19,9 +19,9 @@
   "author": "Travis Ralston <travis.nathaniel.ralston@gmail.com> (http://travisralston.me)",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/turt2live/matrix-appservice-webhooks/issues"
+    "url": "https://github.com/redoonetworks/matrix-appservice-webhooks/issues"
   },
-  "homepage": "https://github.com/turt2live/matrix-appservice-webhooks#readme",
+  "homepage": "https://github.com/redoonetworks/matrix-appservice-webhooks#readme",
   "dependencies": {
     "bluebird": "^3.5.2",
     "body-parser": "^1.18.3",
