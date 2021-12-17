@@ -38,7 +38,7 @@
     "mime": "^2.6.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.22.2",
-    "node-emoji": "^1.8.1",
+    "node-emoji": "^1.11.0",
     "parse-data-uri": "^0.2.0",
     "pubsub-js": "^1.7.0",
     "random-string": "^0.2.0",
