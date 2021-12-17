@@ -35,7 +35,7 @@
     "lodash": "^4.17.13",
     "matrix-appservice-bridge": "^2.6.1",
     "matrix-js-snippets": "^0.2.8",
-    "mime": "^2.3.1",
+    "mime": "^2.6.0",
     "mkdirp": "^0.5.1",
     "moment": "^2.22.2",
     "node-emoji": "^1.8.1",
