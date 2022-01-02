@@ -30,7 +30,7 @@ To send a notice or emote, add `"msgtype" : "notice"` or `"msgtype" : "emote"` i
 1. Clone this repository and install the dependencies
 
    ```
-   git clone http://github.com/turt2live/matrix-appservice-webhooks
+   git clone http://github.com/redoonetworks/matrix-appservice-webhooks
    cd matrix-appservice-webhooks
    npm install
    ```
@@ -72,7 +72,7 @@ The bridge should start working shortly afterwards.
 A Docker image of the bridge is available to host the bridge yourself. The image can be built yourself with `docker build -t matrix-appservice-webhooks .` or you can use the image on docker.io:
 
 ```
-docker run -p 9000:9000 -v /path/to/webhooks/dir:/data turt2live/matrix-appservice-webhooks
+docker run -p 9000:9000 -v /path/to/webhooks/dir:/data redoonetworks/matrix-appservice-webhooks
 ```
 
 The `/path/to/webhooks/dir` should have an `appservice-registration-webhooks.yaml` file, `config.yaml`, and `database.json`. Additional bridge-related data will be stored here.
