@@ -26,9 +26,10 @@ COPY src ./src
 COPY config ./config
 COPY migrations ./migrations
 
-RUN npm install
-RUN npm audit fix
-
+RUN ln -s /usr/bin/python3 /usr/bin/python && \
+        npm install -g npm && \
+        npm install
+#RUN npm audit fix
 
 ############################################################
 #
