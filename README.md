@@ -1,3 +1,7 @@
+# Planned obsolescence 
+
+Check out [matrix-hookshot](https://github.com/Half-Shot/matrix-hookshot) as a replacement for this archaic bridge :)
+
 # matrix-appservice-webhooks
 
 [![TravisCI badge](https://travis-ci.org/turt2live/matrix-appservice-webhooks.svg?branch=master)](https://travis-ci.org/turt2live/matrix-appservice-webhooks)
