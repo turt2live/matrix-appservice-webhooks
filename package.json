@@ -44,7 +44,7 @@
     "random-string": "^0.2.0",
     "request": "^2.88.0",
     "sequelize": "^4.40.0",
-    "sqlite3": "^4.0.2",
+    "sqlite3": "^5.0.3",
     "striptags": "^3.2.0",
     "uuid": "^3.3.0",
     "winston": "^2.4.4"
