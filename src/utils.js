@@ -33,10 +33,10 @@ function uploadContentFromUrl(bridge, url, id, name) {
     id = id || null;
     name = name || null;
     return new Promise((resolve, reject) => {
+        request(url, { encoding: null }, (err, res, body) => {
+            if (err)
+                return reject("Failed to download.");
 
-        const ht = url.startsWith("https") ? https : http;
-
-        ht.get((url), (res) => {
             if (res.headers.hasOwnProperty("content-type")) {
                 contenttype = res.headers["content-type"];
             } else {
@@ -48,41 +48,20 @@ function uploadContentFromUrl(bridge, url, id, name) {
                 const parts = url.split("/");
                 name = parts[parts.length - 1];
             }
-            let size = parseInt(res.headers["content-length"]);
-            if (isNaN(size)) {
-                LogService.warn("UploadContentFromUrl", "Content-length is not valid. Assuming 512kb size");
-                size = 512 * 1024;
-            }
-            let buffer;
-            if (Buffer.alloc) {//Since 5.10
-                buffer = Buffer.alloc(size);
-            } else {//Deprecated
-                buffer = new Buffer(size);
-            }
 
-            let bsize = 0;
-            res.on('data', (d) => {
-                d.copy(buffer, bsize);
-                bsize += d.length;
-            });
-            res.on('error', () => {
-                reject("Failed to download.");
-            });
-            res.on('end', () => {
-                resolve(buffer);
-            });
+            resolve(body);
         })
     }).then((buffer) => {
         if (typeof id === "string" || id == null) {
             id = bridge.getIntent(id);
         }
-        return id.getClient().uploadContent({
-            stream: buffer,
+        return id.getClient().uploadContent(buffer, {
             name: name,
-            type: contenttype
+            type: contenttype,
+            rawResponse: false
         });
     }).then((response) => {
-        const content_uri = JSON.parse(response).content_uri;
+        const content_uri = response.content_uri;
         LogService.info("UploadContent", "Media uploaded to " + content_uri);
         return content_uri;
     }).catch(function (reason) {
