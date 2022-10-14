@@ -23,7 +23,7 @@ const cli = new Cli({
                 localpart: "_webhook",
                 appearance: {
                     displayName: "Webhook Bridge",
-                    avatarUrl: "http://i.imgur.com/IDOBtEJ.png" // webhook bridge icon
+                    avatar_url: "http://i.imgur.com/IDOBtEJ.png" // webhook bridge icon
                 }
             },
             web: {

@@ -30,7 +30,7 @@ properties:
         properties:
           displayName:
             type: "string"
-          avatarUrl:
+          avatar_url:
             type: "string"
   logging:
     type: "object"
