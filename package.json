@@ -30,7 +30,7 @@
     "db-migrate": "^0.11.3",
     "db-migrate-sqlite3": "^0.4.0",
     "emojione": "^3.1.7",
-    "express": "^4.16.4",
+    "express": "^4.17.3",
     "express-interceptor": "^1.2.0",
     "lodash": "^4.17.13",
     "matrix-appservice-bridge": "^2.6.1",
