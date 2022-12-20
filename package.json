@@ -33,7 +33,7 @@
     "express": "^4.17.3",
     "express-interceptor": "^1.2.0",
     "lodash": "^4.17.13",
-    "matrix-appservice-bridge": "^2.6.1",
+    "matrix-appservice-bridge": "^8.0.0",
     "matrix-js-snippets": "^0.2.8",
     "mime": "^2.6.0",
     "mkdirp": "^0.5.1",
